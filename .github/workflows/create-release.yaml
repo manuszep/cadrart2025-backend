@@ -1,8 +1,7 @@
 name: Create release
 on:
-  push:
-    tags:
-      - v*
+  release:
+    types: [published]
 
 env:
   REGISTRY: ghcr.io
@@ -22,16 +21,6 @@ jobs:
       - name: Get Tags
         id: tag
         uses: ildug/get-tag-action@v1
-
-      - name: Create release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ steps.tag.outputs.tag }}
-        run: |
-          gh release create "$tag" \
-              --repo="$GITHUB_REPOSITORY" \
-              --title="Release ${tag#v}" \
-              --generate-notes
 
       - name: Log in to the Container registry
         uses: docker/login-action@v2
