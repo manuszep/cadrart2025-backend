@@ -1,4 +1,4 @@
-name: Build and deploy
+name: Create release
 on:
   push:
     tags:
@@ -19,7 +19,7 @@ jobs:
         run: |
           gh release create "$tag" \
               --repo="$GITHUB_REPOSITORY" \
-              --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
+              --title="Release ${tag#v}" \
               --generate-notes
 
 # jobs:
