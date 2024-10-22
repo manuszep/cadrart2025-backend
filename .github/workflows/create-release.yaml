@@ -12,10 +12,16 @@ jobs:
     name: Release pushed tag
     runs-on: ubuntu-22.04
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+    
+      - name: Get Tags
+        id: tag
+        uses: ildug/get-tag-action@v1
       - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ github.ref_name }}
+          tag: ${{ steps.tag.outputs.version }}
         run: |
           gh release create "$tag" \
               --repo="$GITHUB_REPOSITORY" \
