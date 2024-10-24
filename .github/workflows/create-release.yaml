@@ -70,6 +70,7 @@ jobs:
         uses: Azure/k8s-deploy@v4.4
         with:
           action: deploy
+          namespace: cadrart
           strategy: basic
           imagepullsecrets: |
             dockerconfigjson-github-com
