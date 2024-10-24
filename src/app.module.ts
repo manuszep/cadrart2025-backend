@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { MulterModule } from '@nestjs/platform-express';
-import { memoryStorage } from 'Multer';
+import { memoryStorage } from 'multer';
 import { DataSourceOptions } from 'typeorm';
 
 import { CadrartSocketModule } from './socket/socket.module';
