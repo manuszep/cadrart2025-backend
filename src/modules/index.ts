@@ -8,3 +8,4 @@ export * from './provider/provider.module';
 export * from './tag/tag.module';
 export * from './task/task.module';
 export * from './team-member/team-member.module';
+export * from './version/version.module';

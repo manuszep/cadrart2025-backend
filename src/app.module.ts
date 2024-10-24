@@ -4,8 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'Multer';
+import { DataSourceOptions } from 'typeorm';
 
-import { CadrartAppController } from './app.controller';
 import { CadrartSocketModule } from './socket/socket.module';
 import {
   CadrartArticleModule,
@@ -18,10 +18,10 @@ import {
   CadrartTagModule,
   CadrartTaskModule,
   CadrartTeamMemberModule,
+  CadrartVersionModule,
 } from './modules';
 import { CadrartFileModule } from './modules/file/file.module';
 import { CadrartAuthModule } from './modules/auth/auth.module';
-import { DataSourceOptions } from 'typeorm';
 
 @Module({
   imports: [
@@ -70,8 +70,9 @@ import { DataSourceOptions } from 'typeorm';
     CadrartTaskModule,
     CadrartTeamMemberModule,
     CadrartAuthModule,
+    CadrartVersionModule,
   ],
-  controllers: [CadrartAppController],
+  controllers: [],
   providers: [],
 })
 export class CadrartAppModule {}
