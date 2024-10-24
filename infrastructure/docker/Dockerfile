@@ -3,6 +3,7 @@
 ###################
 
 FROM node:lts-alpine As development
+RUN --mount=type=secret,id=github_token,env=NPM_GITHUB_TOKEN
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -26,6 +27,7 @@ USER node
 ###################
 
 FROM node:lts-alpine As build
+RUN --mount=type=secret,id=github_token,env=NPM_GITHUB_TOKEN
 
 WORKDIR /usr/src/app
 

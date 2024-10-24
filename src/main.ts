@@ -3,6 +3,7 @@ import { urlencoded, json } from 'express';
 import cookieParser from 'cookie-parser';
 
 import { CadrartAppModule } from './app.module';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(CadrartAppModule, {
@@ -10,9 +11,13 @@ async function bootstrap() {
     logger: console,
   });
 
+  const config = app.get(ConfigService);
+
   app.use(json({ limit: '10mb' }));
   app.use(urlencoded({ extended: true, limit: '10mb' }));
   app.use(cookieParser());
   app.setGlobalPrefix('api');
+
+  await app.listen(config.get<number>('CADRART_BACKEND_PORT'));
 }
 bootstrap();
