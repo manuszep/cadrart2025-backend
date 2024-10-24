@@ -32,7 +32,7 @@ spec:
                 secretKeyRef:
                   key: DATABASE_PASSWORD
                   name: cadrart-secret
-            - name: CADRART_DB_USER
+            - name: CADRART_DB_USERNAME
               valueFrom:
                 secretKeyRef:
                   key: DATABASE_USER
