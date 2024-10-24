@@ -5,6 +5,7 @@
 ###################
 
 FROM node:lts-alpine As development
+
 ARG NPM_TOKEN
 ENV NPM_TOKEN ${NPM_TOKEN}
 
@@ -31,6 +32,9 @@ USER node
 ###################
 
 FROM node:lts-alpine As build
+
+ARG NPM_TOKEN
+ENV NPM_TOKEN ${NPM_TOKEN}
 
 WORKDIR /usr/src/app
 
