@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 ###################
 # BUILD FOR LOCAL DEVELOPMENT
 ###################
