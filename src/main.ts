@@ -18,6 +18,6 @@ async function bootstrap() {
   app.use(cookieParser());
   app.setGlobalPrefix('api');
 
-  await app.listen(config.get<number>('CADRART_BACKEND_PORT'));
+  await app.listen(3000);
 }
 bootstrap();
