@@ -6,7 +6,6 @@
 
 FROM node:lts-alpine As development
 RUN --mount=type=secret,id=npm_token,env=NPM_TOKEN
-RUN echo "TOKEN: $(NPM_TOKEN)"
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -15,6 +14,7 @@ WORKDIR /usr/src/app
 # A wildcard is used to ensure copying both package.json AND package-lock.json (when available).
 # Copying this first prevents re-running npm install on every code change.
 COPY --chown=node:node package*.json ./
+COPY --chown=node:node .npmrc ./
 
 # Install app dependencies using the `npm ci` command instead of `npm install`
 RUN npm ci
@@ -34,6 +34,7 @@ FROM node:lts-alpine As build
 WORKDIR /usr/src/app
 
 COPY --chown=node:node package*.json ./
+COPY --chown=node:node .npmrc ./
 
 # In order to run `npm run build` we need access to the Nest CLI which is a dev dependency. In the previous development stage we ran `npm ci` which installed all dependencies, so we can copy over the node_modules directory from the development image
 COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
