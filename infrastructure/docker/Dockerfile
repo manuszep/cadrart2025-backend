@@ -5,7 +5,11 @@
 ###################
 
 FROM node:lts-alpine As development
-RUN --mount=type=secret,id=NPM_TOKEN,env=NPM_TOKEN
+RUN --mount=type=secret,id=NPM_TOKEN \
+    cat /run/secrets/npm_token > /tmp/npm_token
+RUN echo "TOKEN: $(cat /tmp/npm_token)"
+ENV NPM_TOKEN cat /tmp/npm_token
+RUN echo "TOKEN: $(NPM_TOKEN)"
 
 # Create app directory
 WORKDIR /usr/src/app
