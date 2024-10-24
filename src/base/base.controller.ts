@@ -1,22 +1,11 @@
-import {
-  Body,
-  Delete,
-  Get,
-  HttpStatus,
-  Param,
-  Post,
-  Put,
-  Query,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Delete, Get, HttpStatus, Param, Post, Put, Query, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import {
   ICadrartEntitiesResponse,
   ICadrartEntityListOption,
   ICadrartEntityResponse,
   ICadrartListOption,
-  ICadrartResponse,
+  ICadrartResponse
 } from '@manuszep/cadrart2025-common';
 
 import { CadrartSocketService } from '../socket/socket.service';
@@ -27,7 +16,7 @@ import { CadrartBaseService, ICadrartBaseEntity } from './base.service';
 export class CadrartBaseController<T extends ICadrartBaseEntity> {
   constructor(
     private readonly service: CadrartBaseService<T>,
-    private readonly socket: CadrartSocketService,
+    private readonly socket: CadrartSocketService
   ) {}
 
   getLabelForOption(entity: T): string {
@@ -38,27 +27,24 @@ export class CadrartBaseController<T extends ICadrartBaseEntity> {
     return entities.map((entity: T) => {
       return {
         label: this.getLabelForOption(entity),
-        value: (entity as unknown as { id: number }).id,
+        value: (entity as unknown as { id: number }).id
       };
     });
   }
 
   @UseGuards(CadrartJwtAuthGuard)
   @Post()
-  async create(
-    @Res() res: Response,
-    @Body() body: T,
-  ): Promise<Response<ICadrartEntityResponse<T>>> {
+  async create(@Res() res: Response, @Body() body: T): Promise<Response<ICadrartEntityResponse<T>>> {
     const entity = await this.service.create(body);
 
     this.socket.socket?.emit('create', {
       name: this.service.entityName,
-      entity,
+      entity
     });
 
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
-      entity,
+      entity
     });
   }
 
@@ -66,48 +52,45 @@ export class CadrartBaseController<T extends ICadrartBaseEntity> {
   @Get()
   async findAll(
     @Res() res: Response,
-    @Query() query: { page?: number; count?: number },
+    @Query() query: { page?: number; count?: number }
   ): Promise<Response<ICadrartEntitiesResponse<T>>> {
     const result = await this.service.findAll(query.page, query.count);
 
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
       entities: result.entities,
-      total: result.total,
+      total: result.total
     });
   }
 
   @UseGuards(CadrartJwtAuthGuard)
   @Get('/asOptions')
   async findAllAsListOptions(
-    @Res() res: Response,
+    @Res() res: Response
   ): Promise<Response<ICadrartEntitiesResponse<ICadrartEntityListOption>>> {
     const result = await this.service.findAll(1, 1000);
 
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
-      entities: this.convertEntitiesToOptions(result.entities),
+      entities: this.convertEntitiesToOptions(result.entities)
     });
   }
 
   @UseGuards(CadrartJwtAuthGuard)
   @Get(':id')
-  async findOne(
-    @Res() res: Response,
-    @Param('id') id: string,
-  ): Promise<Response<ICadrartEntityResponse<T>>> {
+  async findOne(@Res() res: Response, @Param('id') id: string): Promise<Response<ICadrartEntityResponse<T>>> {
     const entity = await this.service.findOne(id);
 
     if (!entity)
       return res.status(HttpStatus.NOT_FOUND).json({
         statusCode: HttpStatus.NOT_FOUND,
         message: `ERROR_404_${this.service.entityName.toUpperCase()}_FIND_ONE`,
-        entity: {},
+        entity: {}
       });
 
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
-      entity,
+      entity
     });
   }
 
@@ -116,37 +99,34 @@ export class CadrartBaseController<T extends ICadrartBaseEntity> {
   async update(
     @Res() res: Response,
     @Param('id') id: string,
-    @Body() body: T,
+    @Body() body: T
   ): Promise<Response<ICadrartEntityResponse<T>>> {
     const entity = await this.service.update(id, body);
 
     this.socket.socket?.emit('update', {
       name: this.service.entityName,
-      entity,
+      entity
     });
 
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
-      entity,
+      entity
     });
   }
 
   @UseGuards(CadrartJwtAuthGuard)
   @Delete(':id')
-  async remove(
-    @Res() res: Response,
-    @Param('id') id: string,
-  ): Promise<Response<ICadrartResponse>> {
+  async remove(@Res() res: Response, @Param('id') id: string): Promise<Response<ICadrartResponse>> {
     await this.service.remove(id);
 
     this.socket.socket?.emit('delete', {
       name: this.service.entityName,
-      id,
+      id
     });
 
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
-      id,
+      id
     });
   }
 }
