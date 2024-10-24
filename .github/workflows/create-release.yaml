@@ -33,6 +33,8 @@ jobs:
           platforms: linux/amd64
           file: ./infrastructure/docker/Dockerfile
           push: true
+          build-args: |
+            "CADRART_BUILD_VERSION=${{ steps.tag.outputs.version }}"
           secrets: |
             "github_token=${{ secrets.NPM_TOKEN }}"
           tags: |
