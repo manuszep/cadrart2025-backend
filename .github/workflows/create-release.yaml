@@ -27,7 +27,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push the Docker image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/amd64
@@ -35,7 +35,8 @@ jobs:
           push: true
           build-args: |
             CADRART_BUILD_VERSION=${{ steps.tag.outputs.version }}
-            NPM_TOKEN=${{ secrets.NPM_TOKEN }}
+          secrets: |
+            npm_token=${{ secrets.NPM_TOKEN }}
           tags: |
             ghcr.io/manuszep/cadrart2025-backend:latest
             ghcr.io/manuszep/cadrart2025-backend:${{ steps.tag.outputs.version }}
