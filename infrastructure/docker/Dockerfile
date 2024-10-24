@@ -30,7 +30,6 @@ USER node
 ###################
 
 FROM node:lts-alpine As build
-RUN --mount=type=secret,id=NPM_TOKEN,env=NPM_TOKEN
 
 WORKDIR /usr/src/app
 
