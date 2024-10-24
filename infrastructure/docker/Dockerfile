@@ -5,8 +5,7 @@
 ###################
 
 FROM node:lts-alpine As development
-RUN --mount=type=secret,id=github_token,env=NPM_TOKEN
-RUN echo "TOKEN: $NPM_TOKEN"
+RUN --mount=type=secret,id=NPM_TOKEN,env=NPM_TOKEN
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -30,7 +29,7 @@ USER node
 ###################
 
 FROM node:lts-alpine As build
-RUN --mount=type=secret,id=github_token,env=NPM_TOKEN
+RUN --mount=type=secret,id=NPM_TOKEN,env=NPM_TOKEN
 
 WORKDIR /usr/src/app
 

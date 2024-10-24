@@ -34,9 +34,9 @@ jobs:
           file: ./infrastructure/docker/Dockerfile
           push: true
           build-args: |
-            "CADRART_BUILD_VERSION=${{ steps.tag.outputs.version }}"
+            CADRART_BUILD_VERSION=${{ steps.tag.outputs.version }}
           secrets: |
-            "github_token=${{ secrets.NPM_TOKEN }}"
+            NPM_TOKEN=${{ secrets.NPM_TOKEN }}
           tags: |
             ghcr.io/manuszep/cadrart2025-backend:latest
             ghcr.io/manuszep/cadrart2025-backend:${{ steps.tag.outputs.version }}
