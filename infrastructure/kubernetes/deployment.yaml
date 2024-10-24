@@ -22,37 +22,37 @@ spec:
     spec:
       containers:
         - env:
-            - name: DATABASE_DATABASE
+            - name: CADRART_DB_DATABASE
               valueFrom:
                 configMapKeyRef:
                   key: DATABASE_DATABASE
                   name: cadrart-config
-            - name: DATABASE_PASSWORD
+            - name: CADRART_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   key: DATABASE_PASSWORD
                   name: cadrart-secret
-            - name: DATABASE_USER
+            - name: CADRART_DB_USER
               valueFrom:
                 secretKeyRef:
                   key: DATABASE_USER
                   name: cadrart-secret
-            - name: DATABASE_TYPE
+            - name: CADRART_DB_TYPE
               valueFrom:
                 configMapKeyRef:
                   key: DATABASE_TYPE
                   name: cadrart-config
-            - name: DATABASE_HOST
+            - name: CADRART_DB_HOST
               valueFrom:
                 configMapKeyRef:
                   key: DATABASE_HOST
                   name: cadrart-config
-            - name: DATABASE_PORT
+            - name: CADRART_DB_PORT
               valueFrom:
                 configMapKeyRef:
                   key: DATABASE_PORT
                   name: cadrart-config
-            - name: JWT_SECRET
+            - name: CADRART_JWT_SECRET
               valueFrom:
                 secretKeyRef:
                   key: JWT_SECRET
