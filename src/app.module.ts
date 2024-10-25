@@ -18,7 +18,7 @@ import {
   CadrartTagModule,
   CadrartTaskModule,
   CadrartTeamMemberModule,
-  CadrartVersionModule,
+  CadrartVersionModule
 } from './modules';
 import { CadrartFileModule } from './modules/file/file.module';
 import { CadrartAuthModule } from './modules/auth/auth.module';
@@ -26,7 +26,7 @@ import { CadrartAuthModule } from './modules/auth/auth.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true,
+      isGlobal: true
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -40,22 +40,27 @@ import { CadrartAuthModule } from './modules/auth/auth.module';
           database: `${configService.get('CADRART_DB_DATABASE')}`,
           entities: [`${__dirname}/entities/**.entity{.ts,.js}`],
           migrations: [`${__dirname}/migrations/*{.ts,.js}`],
-          synchronize: false,
+          synchronize: false
         };
 
         return config;
-      },
+      }
     }),
     ServeStaticModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => [
-        {
-          rootPath: configService.get<string>('CADRART_STATIC_ROOT'),
-        },
-      ],
+      useFactory: (configService: ConfigService) => {
+        const env = configService.get<string>('ENVIRONMENT');
+
+        return [
+          {
+            serveRoot: '/static',
+            rootPath: env === 'DEV' ? configService.get<string>('STATIC_ROOT') : '/var/www/static'
+          }
+        ];
+      }
     }),
     MulterModule.register({
-      storage: memoryStorage(),
+      storage: memoryStorage()
     }),
     CadrartSocketModule,
     CadrartArticleModule,
@@ -70,9 +75,9 @@ import { CadrartAuthModule } from './modules/auth/auth.module';
     CadrartTaskModule,
     CadrartTeamMemberModule,
     CadrartAuthModule,
-    CadrartVersionModule,
+    CadrartVersionModule
   ],
   controllers: [],
-  providers: [],
+  providers: []
 })
 export class CadrartAppModule {}
