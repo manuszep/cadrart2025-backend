@@ -54,7 +54,10 @@ import { CadrartAuthModule } from './modules/auth/auth.module';
         return [
           {
             serveRoot: '/static',
-            rootPath: env === 'DEV' ? configService.get<string>('STATIC_ROOT') : '/var/www/static'
+            rootPath: env === 'DEV' ? configService.get<string>('STATIC_ROOT') : '/var/www/static',
+            serveStaticOptions: {
+              index: false
+            }
           }
         ];
       }

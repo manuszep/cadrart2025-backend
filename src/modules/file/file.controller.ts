@@ -9,14 +9,14 @@ import {
   Res,
   UploadedFile,
   UseGuards,
-  UseInterceptors,
+  UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ConfigService } from '@nestjs/config';
 
 import { CadrartJwtAuthGuard } from '../auth/jwt-auth.guard';
 
 import { cadrartSharpPipe } from './image.pipe';
-import { ConfigService } from '@nestjs/config';
 
 @Controller('image')
 export class CadrartFileController {
@@ -25,55 +25,42 @@ export class CadrartFileController {
   @UseGuards(CadrartJwtAuthGuard)
   @Post('job')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadJobImage(
-    @Res() res,
-    @UploadedFile(cadrartSharpPipe('job')) file: string,
-  ) {
+  async uploadJobImage(@Res() res, @UploadedFile(cadrartSharpPipe('job')) file: string) {
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
-      file: file,
+      file: file
     });
   }
 
   @UseGuards(CadrartJwtAuthGuard)
   @Post('task')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadTaskImage(
-    @Res() res,
-    @UploadedFile(cadrartSharpPipe('task')) file: string,
-  ) {
+  async uploadTaskImage(@Res() res, @UploadedFile(cadrartSharpPipe('task')) file: string) {
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
-      file: file,
+      file: file
     });
   }
 
   @UseGuards(CadrartJwtAuthGuard)
   @Post('team-member')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadTeamMemberImage(
-    @Res() res,
-    @UploadedFile(cadrartSharpPipe('team-member')) file: string,
-  ) {
+  async uploadTeamMemberImage(@Res() res, @UploadedFile(cadrartSharpPipe('team-member')) file: string) {
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
-      file: file,
+      file: file
     });
   }
 
   @UseGuards(CadrartJwtAuthGuard)
   @Delete(':category/:name')
-  async deleteImage(
-    @Res() res,
-    @Param('category') category: string,
-    @Param('name') name: string,
-  ) {
+  async deleteImage(@Res() res, @Param('category') category: string, @Param('name') name: string) {
     const root = this.config.get('CADRART_STATIC_ROOT');
     const filesList = [
       `${root}/uploads/${category}/${name}_s.webp`,
       `${root}/uploads/${category}/${name}_m.webp`,
       `${root}/uploads/${category}/${name}_l.webp`,
-      `${root}/uploads/${category}/${name}.webp`,
+      `${root}/uploads/${category}/${name}.webp`
     ];
 
     const errors: Array<{ message: string; file: string }> = [];
@@ -96,13 +83,13 @@ export class CadrartFileController {
     if (status !== HttpStatus.OK) {
       return res.status(status).json({
         statusCode: status,
-        errors: errors,
+        errors: errors
       });
     }
 
     return res.status(status).json({
       statusCode: status,
-      files: filesList,
+      files: filesList
     });
   }
 }
