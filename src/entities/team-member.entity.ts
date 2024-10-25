@@ -6,7 +6,7 @@ import {
   AfterLoad,
   BeforeInsert,
   BeforeUpdate,
-  BaseEntity,
+  BaseEntity
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { ICadrartTeamMember } from '@manuszep/cadrart2025-common';
@@ -14,10 +14,7 @@ import { ICadrartTeamMember } from '@manuszep/cadrart2025-common';
 import { CadrartOffer } from './offer.entity';
 
 @Entity('team_member')
-export class CadrartTeamMember
-  extends BaseEntity
-  implements ICadrartTeamMember
-{
+export class CadrartTeamMember extends BaseEntity implements ICadrartTeamMember {
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -25,8 +22,7 @@ export class CadrartTeamMember
 
   @AfterLoad()
   getFullName(): void {
-    const firstName =
-      this.firstName && this.firstName.length > 0 ? `${this.firstName} ` : '';
+    const firstName = this.firstName && this.firstName.length > 0 ? `${this.firstName} ` : '';
 
     this.name = `${firstName}${this.lastName}`;
   }
@@ -49,11 +45,11 @@ export class CadrartTeamMember
   @Column({ type: 'varchar', length: 255, select: false })
   password: string;
 
-  @Column({ type: 'varchar', length: 20, nullable: false, default: '.jpg' })
+  @Column({ type: 'varchar', length: 20, nullable: true, default: 'default' })
   image: string;
 
   @OneToMany(() => CadrartOffer, (offer: CadrartOffer) => offer.assignedTo, {
-    nullable: true,
+    nullable: true
   })
   offers?: CadrartOffer[];
 
