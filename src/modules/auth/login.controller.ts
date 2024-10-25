@@ -1,14 +1,4 @@
-import {
-  Body,
-  Controller,
-  HttpStatus,
-  Post,
-  Res,
-  UseGuards,
-  Request,
-  Response,
-  Get,
-} from '@nestjs/common';
+import { Body, Controller, HttpStatus, Post, Res, UseGuards, Request, Response, Get } from '@nestjs/common';
 import { ICadrartIsLoggedInResponse } from '@manuszep/cadrart2025-common';
 
 import { CadrartTeamMemberService } from '../team-member/team-member.service';
@@ -21,41 +11,34 @@ import { CadrartJwtAuthGuard } from './jwt-auth.guard';
 export class CadrartLoginController {
   constructor(
     private authService: CadrartAuthService,
-    private teamMemberService: CadrartTeamMemberService,
+    private teamMemberService: CadrartTeamMemberService
   ) {}
 
   @UseGuards(CadrartLocalAuthGuard)
   @Post('login')
-  async login(
-    @Request() req,
-    @Body() credentials: { mail: string; password: string },
-    @Response() res,
-  ) {
+  async login(@Request() req, @Body() credentials: { mail: string; password: string }, @Response() res) {
     const token = await this.authService.login(req.user);
 
     res.cookie('accessToken', token, {
       expires: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 7),
       sameSite: 'strict',
-      httpOnly: true,
+      httpOnly: true
     });
 
     return res.send({
       statusCode: HttpStatus.OK,
-      user: req.user,
+      user: req.user
     });
   }
 
   @UseGuards(CadrartJwtAuthGuard)
-  @Get('isLoggedIn')
-  async isLoggedIn(
-    @Request() req,
-    @Res() res,
-  ): Promise<ICadrartIsLoggedInResponse> {
-    const user = await this.teamMemberService.findOne(req.user.id);
+  @Get('isLoggedIn/:id')
+  async isLoggedIn(@Request() req, @Res() res): Promise<ICadrartIsLoggedInResponse> {
+    const user = await this.teamMemberService.findOne(req.id);
 
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
-      user: user,
+      user: user
     });
   }
 }
