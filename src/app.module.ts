@@ -48,19 +48,15 @@ import { CadrartAuthModule } from './modules/auth/auth.module';
     }),
     ServeStaticModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        const env = configService.get<string>('ENVIRONMENT');
-
-        return [
-          {
-            serveRoot: '/static',
-            rootPath: env === 'DEV' ? configService.get<string>('STATIC_ROOT') : '/var/www/static',
-            serveStaticOptions: {
-              index: false
-            }
+      useFactory: (configService: ConfigService) => [
+        {
+          serveRoot: '/static',
+          rootPath: configService.get<string>('STATIC_ROOT'),
+          serveStaticOptions: {
+            index: false
           }
-        ];
-      }
+        }
+      ]
     }),
     MulterModule.register({
       storage: memoryStorage()

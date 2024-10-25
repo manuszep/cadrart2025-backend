@@ -13,17 +13,12 @@ export function createCadrartSharpPipe(directory: string): Type<PipeTransform<Ex
     constructor(@Inject(forwardRef(() => ConfigService)) private config: ConfigService) {}
 
     async transform(image: Express.Multer.File): Promise<string> {
-      const dir = `${this.config.get('CADRART_STATIC_ROOT')}/uploads/${directory}`;
+      const dir = `${this.config.get('STATIC_ROOT')}/uploads/${directory}`;
       const filenameBase = `${Date.now()}`;
 
-      console.log(dir);
-      console.log(filenameBase);
-      console.log(fs.existsSync(dir));
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
       }
-
-      console.log(fs.existsSync(dir));
 
       await sharp(image.buffer)
         .resize(80)

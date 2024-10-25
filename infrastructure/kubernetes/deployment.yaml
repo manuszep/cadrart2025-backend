@@ -57,6 +57,11 @@ spec:
                 secretKeyRef:
                   key: JWT_SECRET
                   name: cadrart-secret
+            - name: STATIC_ROOT
+              valueFrom:
+                configMapKeyRef:
+                  key: STATIC_ROOT
+                  name: cadrart-config
             - name: ENVIRONMENT
               valueFrom:
                 configMapKeyRef:

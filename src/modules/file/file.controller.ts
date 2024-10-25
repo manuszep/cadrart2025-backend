@@ -55,7 +55,7 @@ export class CadrartFileController {
   @UseGuards(CadrartJwtAuthGuard)
   @Delete(':category/:name')
   async deleteImage(@Res() res, @Param('category') category: string, @Param('name') name: string) {
-    const root = this.config.get('CADRART_STATIC_ROOT');
+    const root = this.config.get('STATIC_ROOT');
     const filesList = [
       `${root}/uploads/${category}/${name}_s.webp`,
       `${root}/uploads/${category}/${name}_m.webp`,
