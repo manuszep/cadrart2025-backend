@@ -3,13 +3,12 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ICadrartTokenPayload } from '@manuszep/cadrart2025-common';
+import { Request } from 'express';
 
-function cookieExtractor(req) {
-  if (
-    req.cookies &&
-    req.cookies.accessToken &&
-    req.cookies.accessToken.access_token
-  ) {
+import { ICadrartJWTStrategyResponse } from './types';
+
+function cookieExtractor(req: Request): string | null {
+  if (req.cookies && req.cookies.accessToken && req.cookies.accessToken.access_token) {
     return req.cookies.accessToken.access_token;
   }
 
@@ -22,11 +21,11 @@ export class CadrartJwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
       ignoreExpiration: false,
-      secretOrKey: config.get('CADRART_JWT_SECRET'),
+      secretOrKey: config.get('CADRART_JWT_SECRET')
     });
   }
 
-  async validate(payload: ICadrartTokenPayload) {
+  async validate(payload: ICadrartTokenPayload): Promise<ICadrartJWTStrategyResponse> {
     return { userId: payload.sub, username: payload.username };
   }
 }

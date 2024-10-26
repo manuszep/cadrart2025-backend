@@ -1,9 +1,9 @@
 import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { ICadrartTeamMember } from '@manuszep/cadrart2025-common';
 
 import { CadrartAuthService } from './auth.service';
+import { ICadrartTeamMemberWithoutPassword } from './types';
 
 @Injectable()
 export class CadrartLocalStrategy extends PassportStrategy(Strategy) {
@@ -11,10 +11,7 @@ export class CadrartLocalStrategy extends PassportStrategy(Strategy) {
     super({ usernameField: 'mail', passwordField: 'password' });
   }
 
-  async validate(
-    mail: string,
-    pass: string,
-  ): Promise<Omit<ICadrartTeamMember, 'password'>> {
+  async validate(mail: string, pass: string): Promise<ICadrartTeamMemberWithoutPassword> {
     const user = await this.authService.validateUser(mail, pass);
 
     if (!user) {
