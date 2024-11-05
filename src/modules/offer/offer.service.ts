@@ -1,18 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  Between,
-  FindManyOptions,
-  LessThanOrEqual,
-  MoreThanOrEqual,
-  Not,
-  Repository,
-} from 'typeorm';
-import {
-  ECadrartOfferStatus,
-  addWeeks,
-  resetDateHMS,
-} from '@manuszep/cadrart2025-common';
+import { Between, FindManyOptions, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { ECadrartOfferStatus } from '@manuszep/cadrart2025-common';
 
 import { CadrartBaseService } from '../../base/base.service';
 import { CadrartOffer } from '../../entities/offer.entity';
@@ -20,7 +9,7 @@ import { CadrartOffer } from '../../entities/offer.entity';
 /**
  *  Generate a new offer number in the format yyyymm-xxxx
  */
-function generateOfferNumber(latestOffer: CadrartOffer) {
+function generateOfferNumber(latestOffer: CadrartOffer): string {
   // Get date year and month
   const d = new Date();
   const year = d.getFullYear();
@@ -35,8 +24,7 @@ function generateOfferNumber(latestOffer: CadrartOffer) {
     const latestSuffix = latestOffer.number.replace(offerNumberPrefix, '');
 
     // If the prefix was not found, the offer number is still the same and we're on a new month / year so start from 0
-    offerNumberSuffix =
-      latestSuffix === latestOffer.number ? offerNumberSuffix : latestSuffix;
+    offerNumberSuffix = latestSuffix === latestOffer.number ? offerNumberSuffix : latestSuffix;
   }
 
   // Generate final number by incrementing and padding
@@ -50,7 +38,7 @@ export class CadrartOfferService extends CadrartBaseService<CadrartOffer> {
   entityName = 'Offer';
   override findAllrelations = ['client', 'assignedTo'];
   override findAllOptions: FindManyOptions<CadrartOffer> = {
-    order: { createdAt: 'DESC' },
+    order: { createdAt: 'DESC' }
   };
   override findOnerelations = [
     'client',
@@ -60,12 +48,12 @@ export class CadrartOfferService extends CadrartBaseService<CadrartOffer> {
     'jobs.tasks',
     'jobs.tasks.article',
     'jobs.tasks.children',
-    'jobs.tasks.children.article',
+    'jobs.tasks.children.article'
   ];
 
   constructor(
     @InjectRepository(CadrartOffer)
-    private offersRepository: Repository<CadrartOffer>,
+    private offersRepository: Repository<CadrartOffer>
   ) {
     super(offersRepository);
   }
@@ -84,16 +72,12 @@ export class CadrartOfferService extends CadrartBaseService<CadrartOffer> {
     count = 20,
     createdAtLt?: string,
     createdAtGt?: string,
-    status?: ECadrartOfferStatus,
+    status?: ECadrartOfferStatus
   ): Promise<{ entities: CadrartOffer[]; total: number }> {
     const skip = count * (page - 1);
     const where: { createdAt?: any; status?: ECadrartOfferStatus } = {};
-    const createdAtLtDate = createdAtLt
-      ? new Date(createdAtLt).toISOString()
-      : null;
-    const createdAtGtDate = createdAtGt
-      ? new Date(createdAtGt).toISOString()
-      : null;
+    const createdAtLtDate = createdAtLt ? new Date(createdAtLt).toISOString() : null;
+    const createdAtGtDate = createdAtGt ? new Date(createdAtGt).toISOString() : null;
 
     if (createdAtLtDate && createdAtGtDate) {
       where.createdAt = Between(createdAtGtDate, createdAtLtDate);
@@ -112,7 +96,7 @@ export class CadrartOfferService extends CadrartBaseService<CadrartOffer> {
       where,
       relations: this.findAllrelations,
       take: count,
-      skip: skip,
+      skip: skip
     });
 
     return { entities: res[0], total: res[1] };
@@ -122,13 +106,7 @@ export class CadrartOfferService extends CadrartBaseService<CadrartOffer> {
     return this.offersRepository.find({
       where: { client: { id: clientId } },
       order: { createdAt: 'DESC' },
-      relations: [
-        'client',
-        'assignedTo',
-        'jobs',
-        'jobs.tasks',
-        'jobs.tasks.article',
-      ],
+      relations: ['client', 'assignedTo', 'jobs', 'jobs.tasks', 'jobs.tasks.article']
     });
   }
 
@@ -136,7 +114,7 @@ export class CadrartOfferService extends CadrartBaseService<CadrartOffer> {
     return this.offersRepository.find({
       where: { status: ECadrartOfferStatus.STATUS_STARTED },
       order: { createdAt: 'DESC' },
-      relations: ['client', 'assignedTo'],
+      relations: ['client', 'assignedTo']
     });
   }
 
@@ -144,7 +122,7 @@ export class CadrartOfferService extends CadrartBaseService<CadrartOffer> {
     const offer = this.offersRepository.findOne({
       where: {},
       order: { createdAt: 'DESC' },
-      relations: ['client', 'assignedTo'],
+      relations: ['client', 'assignedTo']
     });
 
     return offer;

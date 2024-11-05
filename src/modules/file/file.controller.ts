@@ -1,4 +1,4 @@
-import fs = require('fs');
+import * as fs from 'fs';
 
 import {
   Controller,
@@ -13,6 +13,8 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
+import { Response } from 'express';
+import { ICadrartErrorResponse, ICadrartFileResponse } from '@manuszep/cadrart2025-common';
 
 import { CadrartJwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -25,7 +27,10 @@ export class CadrartFileController {
   @UseGuards(CadrartJwtAuthGuard)
   @Post('job')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadJobImage(@Res() res, @UploadedFile(cadrartSharpPipe('job')) file: string) {
+  async uploadJobImage(
+    @Res() res: Response,
+    @UploadedFile(cadrartSharpPipe('job')) file: string
+  ): Promise<Response<ICadrartFileResponse>> {
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
       file: file
@@ -35,7 +40,10 @@ export class CadrartFileController {
   @UseGuards(CadrartJwtAuthGuard)
   @Post('task')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadTaskImage(@Res() res, @UploadedFile(cadrartSharpPipe('task')) file: string) {
+  async uploadTaskImage(
+    @Res() res: Response,
+    @UploadedFile(cadrartSharpPipe('task')) file: string
+  ): Promise<Response<ICadrartFileResponse>> {
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
       file: file
@@ -45,7 +53,10 @@ export class CadrartFileController {
   @UseGuards(CadrartJwtAuthGuard)
   @Post('team-member')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadTeamMemberImage(@Res() res, @UploadedFile(cadrartSharpPipe('team-member')) file: string) {
+  async uploadTeamMemberImage(
+    @Res() res: Response,
+    @UploadedFile(cadrartSharpPipe('team-member')) file: string
+  ): Promise<Response<ICadrartFileResponse>> {
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
       file: file
@@ -54,7 +65,11 @@ export class CadrartFileController {
 
   @UseGuards(CadrartJwtAuthGuard)
   @Delete(':category/:name')
-  async deleteImage(@Res() res, @Param('category') category: string, @Param('name') name: string) {
+  async deleteImage(
+    @Res() res: Response,
+    @Param('category') category: string,
+    @Param('name') name: string
+  ): Promise<Response<ICadrartErrorResponse<{ file: string }> | ICadrartFileResponse>> {
     const root = this.config.get('STATIC_ROOT');
     const filesList = [
       `${root}/uploads/${category}/${name}_s.webp`,

@@ -1,4 +1,4 @@
-import { Body, Controller, HttpStatus, Post, Res, UseGuards, Get, Param } from '@nestjs/common';
+import { Controller, HttpStatus, Post, Res, UseGuards, Get, Param, Request } from '@nestjs/common';
 import { ICadrartIsLoggedInResponse } from '@manuszep/cadrart2025-common';
 import { Response } from 'express';
 
@@ -19,10 +19,10 @@ export class CadrartLoginController {
   @UseGuards(CadrartLocalAuthGuard)
   @Post('login')
   async login(
-    @Body() user: ICadrartTeamMemberWithoutPassword,
+    @Request() req: { user: ICadrartTeamMemberWithoutPassword },
     @Res() res: Response
   ): Promise<Response<ICadrartIsLoggedInResponse>> {
-    const token = await this.authService.login(user);
+    const token = await this.authService.login(req.user);
 
     res.cookie('accessToken', token, {
       expires: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 7),
@@ -32,7 +32,7 @@ export class CadrartLoginController {
 
     return res.send({
       statusCode: HttpStatus.OK,
-      user: user
+      user: req.user
     });
   }
 

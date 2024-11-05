@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Res,
-  HttpStatus,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Param, Res, HttpStatus, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import Fuse from 'fuse.js';
 import { ICadrartEntitiesResponse } from '@manuszep/cadrart2025-common';
@@ -21,7 +14,7 @@ import { CadrartClientService } from './client.service';
 export class CadrartClientController extends CadrartBaseController<CadrartClient> {
   constructor(
     private readonly clientService: CadrartClientService,
-    private readonly localSocket: CadrartSocketService,
+    private readonly localSocket: CadrartSocketService
   ) {
     super(clientService, localSocket);
   }
@@ -34,7 +27,7 @@ export class CadrartClientController extends CadrartBaseController<CadrartClient
   @Get('search/:name?')
   async search(
     @Res() res: Response,
-    @Param('name') name: string,
+    @Param('name') name: string
   ): Promise<Response<ICadrartEntitiesResponse<CadrartClient>>> {
     let entities: CadrartClient[];
 
@@ -44,15 +37,13 @@ export class CadrartClientController extends CadrartBaseController<CadrartClient
         shouldSort: true,
         keys: ['fullName'],
         threshold: 0.3,
-        getFn: (o: CadrartClient) => `${o.firstName} ${o.lastName}`,
+        getFn: (o: CadrartClient): string => `${o.firstName} ${o.lastName}`
       };
       const fuse = new Fuse(r.entities, options);
 
-      entities = (fuse.search(name) as { item: CadrartClient }[]).map(
-        (entry: { item: CadrartClient }) => {
-          return entry.item;
-        },
-      );
+      entities = (fuse.search(name) as { item: CadrartClient }[]).map((entry: { item: CadrartClient }) => {
+        return entry.item;
+      });
 
       entities.filter((entity: CadrartClient) => {
         return `${entity.firstName} ${entity.lastName}`;
@@ -63,7 +54,7 @@ export class CadrartClientController extends CadrartBaseController<CadrartClient
 
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
-      entities,
+      entities
     });
   }
 }
