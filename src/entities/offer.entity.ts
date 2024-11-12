@@ -1,16 +1,5 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  ManyToOne,
-  OneToMany,
-  BeforeInsert,
-  BaseEntity,
-} from 'typeorm';
-import {
-  ECadrartOfferStatus,
-  ICadrartOffer,
-} from '@manuszep/cadrart2025-common';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, BeforeInsert, BaseEntity } from 'typeorm';
+import { ECadrartOfferStatus, ICadrartOffer } from '@manuszep/cadrart2025-common';
 
 import { ColumnNumericTransformer } from '../utils';
 
@@ -26,33 +15,23 @@ export class CadrartOffer extends BaseEntity implements ICadrartOffer {
   @Column({
     name: 'created_at',
     type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
+    default: () => 'CURRENT_TIMESTAMP'
   })
   createdAt: Date;
 
   @Column({ type: 'varchar', length: 50 })
   number!: string;
 
-  @ManyToOne(() => CadrartClient, (client: CadrartClient) => client.offers, {
-    cascade: true,
-    nullable: true,
-  })
+  @Column({ type: 'json' })
   client?: CadrartClient;
 
-  @ManyToOne(
-    () => CadrartTeamMember,
-    (teamMember: CadrartTeamMember) => teamMember.offers,
-    {
-      cascade: true,
-      nullable: true,
-    },
-  )
+  @Column({ type: 'json', nullable: true })
   assignedTo?: CadrartTeamMember;
 
   @Column({
     type: 'enum',
     enum: ECadrartOfferStatus,
-    default: ECadrartOfferStatus.STATUS_CREATED,
+    default: ECadrartOfferStatus.STATUS_CREATED
   })
   status!: ECadrartOfferStatus;
 
@@ -61,7 +40,7 @@ export class CadrartOffer extends BaseEntity implements ICadrartOffer {
     precision: 5,
     scale: 2,
     nullable: true,
-    transformer: new ColumnNumericTransformer(),
+    transformer: new ColumnNumericTransformer()
   })
   adjustedReduction?: number;
 
@@ -70,12 +49,12 @@ export class CadrartOffer extends BaseEntity implements ICadrartOffer {
     precision: 5,
     scale: 2,
     nullable: true,
-    transformer: new ColumnNumericTransformer(),
+    transformer: new ColumnNumericTransformer()
   })
   adjustedVat?: number;
 
   @OneToMany(() => CadrartJob, (job: CadrartJob) => job.offer, {
-    cascade: true,
+    cascade: true
   })
   jobs!: CadrartJob[];
 
@@ -84,7 +63,7 @@ export class CadrartOffer extends BaseEntity implements ICadrartOffer {
     precision: 8,
     scale: 2,
     default: 0,
-    transformer: new ColumnNumericTransformer(),
+    transformer: new ColumnNumericTransformer()
   })
   total!: number;
 
@@ -93,7 +72,7 @@ export class CadrartOffer extends BaseEntity implements ICadrartOffer {
     precision: 8,
     scale: 2,
     default: 0,
-    transformer: new ColumnNumericTransformer(),
+    transformer: new ColumnNumericTransformer()
   })
   totalBeforeReduction!: number;
 
@@ -102,7 +81,7 @@ export class CadrartOffer extends BaseEntity implements ICadrartOffer {
     precision: 8,
     scale: 2,
     default: 0,
-    transformer: new ColumnNumericTransformer(),
+    transformer: new ColumnNumericTransformer()
   })
   totalWithVat!: number;
 
