@@ -36,20 +36,10 @@ function generateOfferNumber(latestOffer: CadrartOffer): string {
 @Injectable()
 export class CadrartOfferService extends CadrartBaseService<CadrartOffer> {
   entityName = 'Offer';
-  override findAllrelations = ['client', 'assignedTo'];
   override findAllOptions: FindManyOptions<CadrartOffer> = {
     order: { createdAt: 'DESC' }
   };
-  override findOnerelations = [
-    'client',
-    'assignedTo',
-    'jobs',
-    'jobs.location',
-    'jobs.tasks',
-    'jobs.tasks.article',
-    'jobs.tasks.children',
-    'jobs.tasks.children.article'
-  ];
+  override findOnerelations = ['jobs', 'jobs.tasks', 'jobs.tasks.children'];
 
   constructor(
     @InjectRepository(CadrartOffer)
@@ -94,7 +84,6 @@ export class CadrartOfferService extends CadrartBaseService<CadrartOffer> {
     const res = await this.repository.findAndCount({
       ...this.findAllOptions,
       where,
-      relations: this.findAllrelations,
       take: count,
       skip: skip
     });
@@ -106,23 +95,21 @@ export class CadrartOfferService extends CadrartBaseService<CadrartOffer> {
     return this.offersRepository.find({
       where: { client: { id: clientId } },
       order: { createdAt: 'DESC' },
-      relations: ['client', 'assignedTo', 'jobs', 'jobs.tasks', 'jobs.tasks.article']
+      relations: ['jobs', 'jobs.tasks', 'jobs.tasks.article']
     });
   }
 
   async findAllOpen(): Promise<CadrartOffer[]> {
     return this.offersRepository.find({
       where: { status: ECadrartOfferStatus.STATUS_STARTED },
-      order: { createdAt: 'DESC' },
-      relations: ['client', 'assignedTo']
+      order: { createdAt: 'DESC' }
     });
   }
 
   async findLatest(): Promise<CadrartOffer | undefined> {
     const offer = this.offersRepository.findOne({
       where: {},
-      order: { createdAt: 'DESC' },
-      relations: ['client', 'assignedTo']
+      order: { createdAt: 'DESC' }
     });
 
     return offer;
