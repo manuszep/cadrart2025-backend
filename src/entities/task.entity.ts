@@ -1,16 +1,8 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  ManyToOne,
-  OneToMany,
-  BaseEntity,
-} from 'typeorm';
-import { ICadrartTask } from '@manuszep/cadrart2025-common';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany, BaseEntity } from 'typeorm';
+import { ICadrartArticle, ICadrartTask } from '@manuszep/cadrart2025-common';
 
 import { ColumnNumericTransformer } from '../utils';
 
-import { CadrartArticle } from './article.entity';
 import { CadrartJob } from './job.entity';
 
 @Entity('task')
@@ -19,12 +11,12 @@ export class CadrartTask extends BaseEntity implements ICadrartTask {
   id!: number;
 
   @ManyToOne(() => CadrartJob, (job: CadrartJob) => job.tasks, {
-    onDelete: 'CASCADE',
+    onDelete: 'CASCADE'
   })
   job!: CadrartJob;
 
-  @ManyToOne(() => CadrartArticle, (article: CadrartArticle) => article.tasks)
-  article!: CadrartArticle;
+  @Column({ type: 'json' })
+  article!: ICadrartArticle;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   comment?: string;
@@ -33,7 +25,7 @@ export class CadrartTask extends BaseEntity implements ICadrartTask {
     type: 'decimal',
     precision: 8,
     scale: 2,
-    transformer: new ColumnNumericTransformer(),
+    transformer: new ColumnNumericTransformer()
   })
   total!: number;
 
@@ -41,7 +33,7 @@ export class CadrartTask extends BaseEntity implements ICadrartTask {
     type: 'decimal',
     precision: 8,
     scale: 2,
-    transformer: new ColumnNumericTransformer(),
+    transformer: new ColumnNumericTransformer()
   })
   totalBeforeReduction!: number;
 
@@ -49,7 +41,7 @@ export class CadrartTask extends BaseEntity implements ICadrartTask {
     type: 'decimal',
     precision: 8,
     scale: 2,
-    transformer: new ColumnNumericTransformer(),
+    transformer: new ColumnNumericTransformer()
   })
   totalWithVat!: number;
 
@@ -58,12 +50,12 @@ export class CadrartTask extends BaseEntity implements ICadrartTask {
 
   @OneToMany(() => CadrartTask, (task: CadrartTask) => task.parent, {
     onDelete: 'CASCADE',
-    nullable: true,
+    nullable: true
   })
   children?: CadrartTask[];
 
   @ManyToOne(() => CadrartTask, (task: CadrartTask) => task.children, {
-    nullable: true,
+    nullable: true
   })
   parent?: CadrartTask;
 

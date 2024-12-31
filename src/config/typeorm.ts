@@ -13,7 +13,7 @@ export default new DataSource({
   username: `${configService.get('CADRART_DB_USERNAME')}`,
   password: `${configService.get('CADRART_DB_PASSWORD')}`,
   database: `${configService.get('CADRART_DB_DATABASE')}`,
-  entities: [`${__dirname}/entities/**.entity{.ts,.js}`],
-  migrations: [`${__dirname}/migrations/*{.ts,.js}`],
-  synchronize: false,
+  entities: [`${__dirname}/../entities/**.entity{.ts,.js}`],
+  migrations: [`${__dirname}/../migrations/*{.ts,.js}`],
+  synchronize: false
 });

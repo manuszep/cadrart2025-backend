@@ -6,17 +6,17 @@ import {
   OneToMany,
   BaseEntity,
   BeforeInsert,
-  BeforeUpdate,
+  BeforeUpdate
 } from 'typeorm';
 import {
   ECadrartJobMeasureType,
   ECadrartJobOrientation,
   ICadrartJob,
+  ICadrartLocation
 } from '@manuszep/cadrart2025-common';
 
 import { ColumnDateTransformer, ColumnNumericTransformer } from '../utils';
 
-import { CadrartLocation } from './location.entity';
 import { CadrartTask } from './task.entity';
 import { CadrartOffer } from './offer.entity';
 
@@ -26,7 +26,7 @@ export class CadrartJob extends BaseEntity implements ICadrartJob {
   id!: number;
 
   @ManyToOne(() => CadrartOffer, (offer: CadrartOffer) => offer.jobs, {
-    onDelete: 'CASCADE',
+    onDelete: 'CASCADE'
   })
   offer!: CadrartOffer;
 
@@ -36,37 +36,31 @@ export class CadrartJob extends BaseEntity implements ICadrartJob {
   @Column({
     type: 'enum',
     enum: ECadrartJobOrientation,
-    default: ECadrartJobOrientation.VERTICAL,
+    default: ECadrartJobOrientation.VERTICAL
   })
   orientation!: ECadrartJobOrientation;
 
   @Column({
     type: 'enum',
     enum: ECadrartJobMeasureType,
-    default: ECadrartJobMeasureType.MEASURE_GLASS,
+    default: ECadrartJobMeasureType.MEASURE_GLASS
   })
   measure!: ECadrartJobMeasureType;
 
-  @ManyToOne(
-    () => CadrartLocation,
-    (location: CadrartLocation) => location.jobs,
-    {
-      nullable: true,
-    },
-  )
-  location?: CadrartLocation;
+  @Column({ type: 'json', nullable: true })
+  location?: ICadrartLocation;
 
   @Column({
     type: 'date',
     nullable: true,
-    transformer: new ColumnDateTransformer(),
+    transformer: new ColumnDateTransformer()
   })
   dueDate?: Date;
 
   @Column({
     type: 'date',
     nullable: true,
-    transformer: new ColumnDateTransformer(),
+    transformer: new ColumnDateTransformer()
   })
   startDate?: Date;
 
@@ -75,7 +69,7 @@ export class CadrartJob extends BaseEntity implements ICadrartJob {
     precision: 7,
     scale: 2,
     default: 0,
-    transformer: new ColumnNumericTransformer(),
+    transformer: new ColumnNumericTransformer()
   })
   openingWidth!: number;
 
@@ -84,7 +78,7 @@ export class CadrartJob extends BaseEntity implements ICadrartJob {
     precision: 7,
     scale: 2,
     default: 0,
-    transformer: new ColumnNumericTransformer(),
+    transformer: new ColumnNumericTransformer()
   })
   openingHeight!: number;
 
@@ -93,7 +87,7 @@ export class CadrartJob extends BaseEntity implements ICadrartJob {
     precision: 7,
     scale: 2,
     default: 0,
-    transformer: new ColumnNumericTransformer(),
+    transformer: new ColumnNumericTransformer()
   })
   marginWidth!: number;
 
@@ -102,7 +96,7 @@ export class CadrartJob extends BaseEntity implements ICadrartJob {
     precision: 7,
     scale: 2,
     default: 0,
-    transformer: new ColumnNumericTransformer(),
+    transformer: new ColumnNumericTransformer()
   })
   marginHeight!: number;
 
@@ -111,7 +105,7 @@ export class CadrartJob extends BaseEntity implements ICadrartJob {
     precision: 7,
     scale: 2,
     default: 0,
-    transformer: new ColumnNumericTransformer(),
+    transformer: new ColumnNumericTransformer()
   })
   glassWidth!: number;
 
@@ -120,13 +114,13 @@ export class CadrartJob extends BaseEntity implements ICadrartJob {
     precision: 7,
     scale: 2,
     default: 0,
-    transformer: new ColumnNumericTransformer(),
+    transformer: new ColumnNumericTransformer()
   })
   glassHeight!: number;
 
   @OneToMany(() => CadrartTask, (task: CadrartTask) => task.job, {
     cascade: true,
-    nullable: true,
+    nullable: true
   })
   tasks?: CadrartTask[];
 
@@ -141,7 +135,7 @@ export class CadrartJob extends BaseEntity implements ICadrartJob {
     precision: 8,
     scale: 2,
     default: 0,
-    transformer: new ColumnNumericTransformer(),
+    transformer: new ColumnNumericTransformer()
   })
   total!: number;
 
@@ -150,7 +144,7 @@ export class CadrartJob extends BaseEntity implements ICadrartJob {
     precision: 8,
     scale: 2,
     default: 0,
-    transformer: new ColumnNumericTransformer(),
+    transformer: new ColumnNumericTransformer()
   })
   totalBeforeReduction!: number;
 
@@ -159,7 +153,7 @@ export class CadrartJob extends BaseEntity implements ICadrartJob {
     precision: 8,
     scale: 2,
     default: 0,
-    transformer: new ColumnNumericTransformer(),
+    transformer: new ColumnNumericTransformer()
   })
   totalWithVat!: number;
 
@@ -168,9 +162,7 @@ export class CadrartJob extends BaseEntity implements ICadrartJob {
     // Remove tasks that don't have articles
 
     if (this.tasks) {
-      this.tasks = this.tasks.filter(
-        (task: CadrartTask) => task.article !== null,
-      );
+      this.tasks = this.tasks.filter((task: CadrartTask) => task.article !== null);
     }
   }
 
@@ -179,9 +171,7 @@ export class CadrartJob extends BaseEntity implements ICadrartJob {
     // Remove tasks that don't have articles
 
     if (this.tasks) {
-      this.tasks = this.tasks.filter(
-        (task: CadrartTask) => task.article !== null,
-      );
+      this.tasks = this.tasks.filter((task: CadrartTask) => task.article !== null);
     }
   }
 }
