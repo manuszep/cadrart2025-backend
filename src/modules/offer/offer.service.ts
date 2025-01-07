@@ -92,11 +92,13 @@ export class CadrartOfferService extends CadrartBaseService<CadrartOffer> {
   }
 
   async findAllByClient(clientId: number): Promise<CadrartOffer[]> {
-    return this.offersRepository.find({
-      where: { client: { id: clientId } },
-      order: { createdAt: 'DESC' },
-      relations: ['jobs', 'jobs.tasks', 'jobs.tasks.article']
-    });
+    return await this.offersRepository
+      .createQueryBuilder('offer')
+      .where('JSON_EXTRACT(offer.client, "$.id") = :id', { id: Number(clientId) })
+      .orderBy('offer.createdAt', 'DESC')
+      .leftJoinAndSelect('offer.jobs', 'jobs')
+      .leftJoinAndSelect('jobs.tasks', 'tasks')
+      .getMany();
   }
 
   async findAllOpen(): Promise<CadrartOffer[]> {
