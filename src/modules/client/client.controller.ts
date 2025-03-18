@@ -24,8 +24,8 @@ export class CadrartClientController extends CadrartBaseController<CadrartClient
   }
 
   @UseGuards(CadrartJwtAuthGuard)
-  @Get('search/:name?')
-  async search(
+  @Get('search/:name')
+  async searchByName(
     @Res() res: Response,
     @Param('name') name: string
   ): Promise<Response<ICadrartEntitiesResponse<CadrartClient>>> {

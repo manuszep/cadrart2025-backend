@@ -162,7 +162,7 @@ export class CadrartJob extends BaseEntity implements ICadrartJob {
     // Remove tasks that don't have articles
 
     if (this.tasks) {
-      this.tasks = this.tasks.filter((task: CadrartTask) => task.article !== null);
+      this.tasks = this.tasks.filter((task: CadrartTask) => task.article !== null && task.article !== undefined);
     }
   }
 
@@ -171,7 +171,7 @@ export class CadrartJob extends BaseEntity implements ICadrartJob {
     // Remove tasks that don't have articles
 
     if (this.tasks) {
-      this.tasks = this.tasks.filter((task: CadrartTask) => task.article !== null);
+      this.tasks = this.tasks.filter((task: CadrartTask) => task.article !== null && task.article !== undefined);
     }
   }
 }

@@ -52,9 +52,9 @@ export class CadrartBaseController<T extends ICadrartBaseEntity> {
   @Get()
   async findAll(
     @Res() res: Response,
-    @Query() query: { page?: number; count?: number }
+    @Query() query: { page?: number; count?: number; needle?: string }
   ): Promise<Response<ICadrartEntitiesResponse<T>>> {
-    const result = await this.service.findAll(query.page, query.count);
+    const result = await this.service.findAll(query.page, query.count, query.needle);
 
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,

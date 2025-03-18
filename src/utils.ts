@@ -30,7 +30,6 @@ export class ColumnNumericTransformer implements ValueTransformer {
 
 export class ColumnDateTransformer implements ValueTransformer {
   from(data?: Date | null): string | null {
-    console.log('from: ', data);
     if (!isNullOrUndefined(data)) {
       return typeof data === 'string' ? data : data.toISOString();
     }
@@ -39,9 +38,7 @@ export class ColumnDateTransformer implements ValueTransformer {
   }
 
   to(data?: string | null): Date | null {
-    console.log('to: ', data);
     if (!isNullOrUndefined(data)) {
-      console.log('NotNullOrUndefined: ', data);
       return new Date(data);
     }
 

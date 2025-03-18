@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 
-import { CadrartBaseService } from '../../base/base.service';
+import { CadrartBaseService, ICadrartBaseServiceFindParam } from '../../base/base.service';
 import { CadrartArticle } from '../../entities/article.entity';
 
 @Injectable()
@@ -20,5 +20,15 @@ export class CadrartArticleService extends CadrartBaseService<CadrartArticle> {
       relations: this.findAllrelations,
       where: { combine: true }
     });
+  }
+
+  getSearchConfig(needle: string): ICadrartBaseServiceFindParam<CadrartArticle> {
+    if (!needle) {
+      return [];
+    }
+
+    const pattern = `%${needle}%`;
+
+    return [{ name: Like(pattern) }, { place: Like(pattern) }, { provider: { name: Like(pattern) } }];
   }
 }

@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, FindManyOptions, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { Between, FindManyOptions, FindOperator, LessThanOrEqual, Like, MoreThanOrEqual, Repository } from 'typeorm';
 import { ECadrartOfferStatus } from '@manuszep/cadrart2025-common';
 
-import { CadrartBaseService } from '../../base/base.service';
+import { CadrartBaseService, ICadrartBaseServiceFindParam } from '../../base/base.service';
 import { CadrartOffer } from '../../entities/offer.entity';
 
 /**
@@ -65,9 +65,9 @@ export class CadrartOfferService extends CadrartBaseService<CadrartOffer> {
     status?: ECadrartOfferStatus
   ): Promise<{ entities: CadrartOffer[]; total: number }> {
     const skip = count * (page - 1);
-    const where: { createdAt?: any; status?: ECadrartOfferStatus } = {};
-    const createdAtLtDate = createdAtLt ? new Date(createdAtLt).toISOString() : null;
-    const createdAtGtDate = createdAtGt ? new Date(createdAtGt).toISOString() : null;
+    const where: { createdAt?: FindOperator<Date>; status?: ECadrartOfferStatus } = {};
+    const createdAtLtDate: Date | null = createdAtLt ? new Date(createdAtLt) : null;
+    const createdAtGtDate: Date | null = createdAtGt ? new Date(createdAtGt) : null;
 
     if (createdAtLtDate && createdAtGtDate) {
       where.createdAt = Between(createdAtGtDate, createdAtLtDate);
@@ -115,5 +115,15 @@ export class CadrartOfferService extends CadrartBaseService<CadrartOffer> {
     });
 
     return offer;
+  }
+
+  getSearchConfig(needle: string): ICadrartBaseServiceFindParam<CadrartOffer> {
+    if (!needle) {
+      return [];
+    }
+
+    const pattern = `%${needle}%`;
+
+    return [{ client: Like(pattern), assignedTo: Like(pattern) }];
   }
 }

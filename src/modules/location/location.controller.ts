@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  HttpStatus,
-  Param,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, HttpStatus, Param, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import Fuse from 'fuse.js';
 import { ICadrartEntitiesResponse } from '@manuszep/cadrart2025-common';
@@ -21,7 +14,7 @@ import { CadrartLocationService } from './location.service';
 export class CadrartLocationController extends CadrartBaseController<CadrartLocation> {
   constructor(
     private readonly locationService: CadrartLocationService,
-    private readonly localSocket: CadrartSocketService,
+    private readonly localSocket: CadrartSocketService
   ) {
     super(locationService, localSocket);
   }
@@ -32,9 +25,9 @@ export class CadrartLocationController extends CadrartBaseController<CadrartLoca
 
   @UseGuards(CadrartJwtAuthGuard)
   @Get('search/:name?')
-  async search(
+  async searchByName(
     @Res() res: Response,
-    @Param('name') name: string,
+    @Param('name') name: string
   ): Promise<Response<ICadrartEntitiesResponse<CadrartLocation>>> {
     let entities: CadrartLocation[];
 
@@ -43,11 +36,9 @@ export class CadrartLocationController extends CadrartBaseController<CadrartLoca
       const options = { shouldSort: true, keys: ['name'], threshold: 0.3 };
       const fuse = new Fuse(r.entities, options);
 
-      entities = (fuse.search(name) as { item: CadrartLocation }[]).map(
-        (entry: { item: CadrartLocation }) => {
-          return entry.item;
-        },
-      );
+      entities = (fuse.search(name) as { item: CadrartLocation }[]).map((entry: { item: CadrartLocation }) => {
+        return entry.item;
+      });
 
       entities.filter((entity: CadrartLocation) => {
         return entity.name;
@@ -58,7 +49,7 @@ export class CadrartLocationController extends CadrartBaseController<CadrartLoca
 
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
-      entities,
+      entities
     });
   }
 }

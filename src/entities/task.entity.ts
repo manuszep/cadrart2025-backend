@@ -50,7 +50,8 @@ export class CadrartTask extends BaseEntity implements ICadrartTask {
 
   @OneToMany(() => CadrartTask, (task: CadrartTask) => task.parent, {
     onDelete: 'CASCADE',
-    nullable: true
+    nullable: true,
+    cascade: true
   })
   children?: CadrartTask[];
 

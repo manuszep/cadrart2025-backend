@@ -13,18 +13,18 @@ export class CadrartTaskService extends CadrartBaseService<CadrartExtendedTask> 
 
   override findAllOptions: FindManyOptions<CadrartExtendedTask> = {
     where: {
-      offerStatus: ECadrartOfferStatus.STATUS_STARTED,
+      offerStatus: ECadrartOfferStatus.STATUS_STARTED
     },
     order: {
-      jobDueDate: 'ASC',
-    },
+      jobDueDate: 'ASC'
+    }
   };
 
   constructor(
     @InjectRepository(CadrartExtendedTask)
     private extendedTasksRepository: Repository<CadrartExtendedTask>,
     @InjectRepository(CadrartTask)
-    private tasksRepository: Repository<CadrartTask>,
+    private tasksRepository: Repository<CadrartTask>
   ) {
     super(extendedTasksRepository);
   }

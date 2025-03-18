@@ -1,9 +1,9 @@
 import { ViewEntity, ViewColumn, BaseEntity } from 'typeorm';
-import { ICadrartExtendedTask } from '@manuszep/cadrart2025-common';
+import { ECadrartOfferStatus, ICadrartExtendedTask } from '@manuszep/cadrart2025-common';
 
 @ViewEntity({
   expression:
-    'SELECT\
+    "SELECT\
       `task`.`id` AS `id`,\
       `task`.`comment` AS `taskComment`,\
       `task`.`total` AS `taskTotal`,\
@@ -24,31 +24,27 @@ import { ICadrartExtendedTask } from '@manuszep/cadrart2025-common';
       `job`.`glassHeight` AS `jobGlassHeight`,\
       `job`.`description` AS `jobDescription`,\
       `job`.`image` AS `jobImage`,\
-      `location`.`name` AS `jobLocation`,\
-      `article`.`id` AS `articleId`,\
-      `article`.`name` AS `articleName`,\
-      `article`.`place` AS `articlePlace`,\
-      `article`.`family` AS `articleFamily`,\
+      `job`.`location`->>'$.name' AS `jobLocation`,\
+      `task`.`article`->>'$.id' AS `articleId`,\
+      `task`.`article`->>'$.name' AS `articleName`,\
+      `task`.`article`->>'$.place' AS `articlePlace`,\
+      `task`.`article`->>'$.family' AS `articleFamily`,\
       `offer`.`id` AS `offerId`,\
       `offer`.`status` AS `offerStatus`,\
-      `team_member`.`id` AS `assignedToId`,\
-      `team_member`.`firstName` AS `assignedToFirstName`,\
-      `team_member`.`lastName` AS `assignedToLastName`,\
-      `client`.`id` AS `clientId`,\
-      `client`.`firstName` AS `clientFirstName`,\
-      `client`.`lastName` AS `clientLastName`\
+      `offer`.`assignedTo`->>'$.id' AS `assignedToId`,\
+      `offer`.`assignedTo`->>'$.firstName' AS `assignedToFirstName`,\
+      `offer`.`assignedTo`->>'$.lastName' AS `assignedToLastName`,\
+      `offer`.`client`->>'$.id' AS `clientId`,\
+      `offer`.`client`->>'$.firstName' AS `clientFirstName`,\
+      `offer`.`client`->>'$.lastName' AS `clientLastName`\
     FROM `task`\
     LEFT JOIN `job` ON `task`.`jobId`=`job`.`id`\
-    LEFT JOIN `article` ON `task`.`articleId`=`article`.`id`\
     LEFT JOIN `offer` ON `job`.`offerId`=`offer`.`id`\
-    LEFT JOIN `client` ON `offer`.`clientId`=`client`.`id`\
-    LEFT JOIN `location` ON `job`.`locationId`=`location`.`id`\
-    LEFT JOIN `team_member` ON `offer`.`assignedToId`=`team_member`.`id`',
+    WHERE `offer`.`status` = '" +
+    ECadrartOfferStatus.STATUS_STARTED +
+    "';"
 })
-export class CadrartExtendedTask
-  extends BaseEntity
-  implements ICadrartExtendedTask
-{
+export class CadrartExtendedTask extends BaseEntity implements ICadrartExtendedTask {
   @ViewColumn()
   id!: number;
 

@@ -18,15 +18,15 @@ export class CadrartAppGateway implements OnGatewayInit, OnGatewayConnection, On
 
   private logger: Logger = new Logger('AppGateway');
 
-  afterInit(server: Server) {
+  afterInit(server: Server): void {
     this.socketService.socket = server;
   }
 
-  handleDisconnect(client: Socket) {
+  handleDisconnect(client: Socket): void {
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
-  handleConnection(client: Socket) {
+  handleConnection(client: Socket): void {
     this.logger.log(`Client connected: ${client.id}`);
   }
 }

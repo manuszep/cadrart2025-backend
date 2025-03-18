@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 
-import { CadrartBaseService } from '../../base/base.service';
+import { CadrartBaseService, ICadrartBaseServiceFindParam } from '../../base/base.service';
 import { CadrartTeamMember } from '../../entities/team-member.entity';
 
 @Injectable()
@@ -33,5 +33,15 @@ export class CadrartTeamMemberService extends CadrartBaseService<CadrartTeamMemb
     });
 
     return this.repository.save(updatedEntity);
+  }
+
+  getSearchConfig(needle: string): ICadrartBaseServiceFindParam<CadrartTeamMember> {
+    if (!needle) {
+      return [];
+    }
+
+    const pattern = `%${needle}%`;
+
+    return [{ firstName: Like(pattern) }, { lastName: Like(pattern) }, { mail: Like(pattern) }];
   }
 }

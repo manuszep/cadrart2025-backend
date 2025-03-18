@@ -7,6 +7,8 @@ interface ICadrartBaseEntityProps {
 
 export interface ICadrartBaseEntity extends BaseEntity, ICadrartBaseEntityProps {}
 
+export type ICadrartBaseServiceFindParam<T> = FindOptionsWhere<T> | FindOptionsWhere<T>[];
+
 export abstract class CadrartBaseService<T extends ICadrartBaseEntity> {
   abstract entityName: string;
   protected relations: string[] = [];
@@ -25,16 +27,26 @@ export abstract class CadrartBaseService<T extends ICadrartBaseEntity> {
     return this.repository.save(newEntity);
   }
 
-  async findAll(page = 1, count = 20): Promise<{ entities: T[]; total: number }> {
+  async findAll(page = 1, count = 20, needle?: string): Promise<{ entities: T[]; total: number }> {
     const skip = count * (page - 1);
+    const where = this.getSearchConfig(needle);
     const res = await this.repository.findAndCount({
       ...this.findAllOptions,
       relations: this.findAllrelations,
       take: count,
-      skip: skip
+      skip: skip,
+      where
     });
 
     return { entities: res[0], total: res[1] };
+  }
+
+  getSearchConfig(needle: string): ICadrartBaseServiceFindParam<T> {
+    if (!needle) {
+      return [];
+    }
+
+    return [];
   }
 
   async findOne(id: string): Promise<T> {
