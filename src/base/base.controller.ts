@@ -119,7 +119,7 @@ export class CadrartBaseController<T extends ICadrartBaseEntity> {
   async remove(@Res() res: Response, @Param('id') id: string): Promise<Response<ICadrartResponse>> {
     try {
       await this.service.remove(id);
-    } catch (e) {
+    } catch (_e) {
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `ERROR.API.${this.service.entityName.toUpperCase()}.DELETE`
