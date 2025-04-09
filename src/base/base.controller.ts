@@ -117,7 +117,14 @@ export class CadrartBaseController<T extends ICadrartBaseEntity> {
   @UseGuards(CadrartJwtAuthGuard)
   @Delete(':id')
   async remove(@Res() res: Response, @Param('id') id: string): Promise<Response<ICadrartResponse>> {
-    await this.service.remove(id);
+    try {
+      await this.service.remove(id);
+    } catch (e) {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: `ERROR.API.${this.service.entityName.toUpperCase()}.DELETE`
+      });
+    }
 
     this.socket.socket?.emit('delete', {
       name: this.service.entityName,

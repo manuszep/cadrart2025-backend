@@ -1,15 +1,14 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { CadrartTask } from '../../entities/task.entity';
-import { CadrartExtendedTask } from '../../entities/extended-task.view.entity';
+import { CadrartOfferService } from '../offer/offer.service';
+import { CadrartOffer } from '../../entities/offer.entity';
 
-import { CadrartTaskService } from './task.service';
 import { CadrartTaskController } from './task.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CadrartTask, CadrartExtendedTask])],
+  imports: [TypeOrmModule.forFeature([CadrartOffer])],
   controllers: [CadrartTaskController],
-  providers: [CadrartTaskService]
+  providers: [CadrartOfferService]
 })
 export class CadrartTaskModule {}
