@@ -1,18 +1,13 @@
-import { Controller, Get, HttpStatus, Param, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Param, Put, Res, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { Response } from 'express';
-import {
-  ECadrartArticleFamily,
-  ICadrartEntitiesResponse,
-  ICadrartExtendedTask,
-  ICadrartJob,
-  ICadrartOffer,
-  ICadrartTask
-} from '@manuszep/cadrart2025-common';
+import { ECadrartArticleFamily, ICadrartEntitiesResponse, ICadrartExtendedTask } from '@manuszep/cadrart2025-common';
 
-import { CadrartBaseController } from '../../base/base.controller';
 import { CadrartSocketService } from '../../socket/socket.service';
 import { CadrartJwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CadrartOfferService } from '../offer/offer.service';
+
+import { extractTasksFromOffers } from './task.mapper';
+import { CadrartTaskService } from './task.service';
 
 const familyRouteMapping = {
   assembly: ECadrartArticleFamily.ASSEMBLY,
@@ -23,116 +18,15 @@ const familyRouteMapping = {
 };
 
 @Controller('task')
-export class CadrartTaskController extends CadrartBaseController<any> {
+export class CadrartTaskController {
   constructor(
-    private readonly localSocket: CadrartSocketService,
-    private readonly offerService: CadrartOfferService
-  ) {
-    super(offerService, localSocket);
-  }
+    private readonly socket: CadrartSocketService,
+    private readonly offerService: CadrartOfferService,
+    private readonly tasksService: CadrartTaskService
+  ) {}
 
-  override getLabelForOption(entity: ICadrartExtendedTask): string {
+  getLabelForOption(entity: ICadrartExtendedTask): string {
     return entity.articleName;
-  }
-
-  private mapTaskToExtendedTask(
-    task: ICadrartTask,
-    job: ICadrartJob,
-    offer: ICadrartOffer,
-    rawTasks?: ICadrartTask[],
-    allowNesting = true
-  ): ICadrartExtendedTask {
-    const jobTasks =
-      task.article.family !== ECadrartArticleFamily.ASSEMBLY || !allowNesting
-        ? []
-        : rawTasks.map((jobTask) => this.mapTaskToExtendedTask(jobTask, job, offer, rawTasks, false));
-
-    return {
-      id: task.id,
-      taskComment: task.comment,
-      taskTotal: task.total,
-      taskImage: task.image,
-      taskDoneCount: task.doneCount,
-      parent: task.parent ? this.mapTaskToExtendedTask(task.parent, job, offer, rawTasks) : null,
-      jobId: job.id,
-      jobTasks: jobTasks,
-      jobCount: job.count,
-      jobOrientation: job.orientation,
-      jobMeasure: job.measure,
-      jobDueDate: job.dueDate,
-      jobStartDate: job.startDate,
-      jobOpeningWidth: job.openingWidth,
-      jobOpeningHeight: job.openingHeight,
-      jobMarginWidth: job.marginWidth,
-      jobMarginHeight: job.marginHeight,
-      jobGlassWidth: job.glassWidth,
-      jobGlassHeight: job.glassHeight,
-      jobDescription: job.description,
-      jobImage: job.image,
-      jobLocation: job.location?.name,
-      articleId: task.article.id,
-      articleName: task.article.name,
-      articlePlace: task.article.place,
-      articleFamily: task.article.family,
-      offerId: offer.id,
-      offerStatus: offer.status,
-      assignedToId: offer.assignedTo.id,
-      assignedToFirstName: offer.assignedTo.firstName,
-      assignedToLastName: offer.assignedTo.lastName,
-      clientId: offer.client.id,
-      clientFirstName: offer.client.firstName,
-      clientLastName: offer.client.lastName
-    };
-  }
-
-  private extractTasksFromJob(offer: ICadrartOffer, job: ICadrartJob): ICadrartExtendedTask[] {
-    const rawTasks: ICadrartTask[] = [];
-
-    job.tasks.forEach((task: ICadrartTask) => {
-      rawTasks.push(task);
-
-      if (task.children) {
-        task.children.forEach((child: ICadrartTask) => {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { children, ...parent } = task;
-
-          rawTasks.push(Object.assign({ parent: parent }, child));
-        });
-      }
-    });
-
-    return rawTasks.map((task) => this.mapTaskToExtendedTask(task, job, offer, rawTasks));
-  }
-
-  private extractTasksFromOffer(offer: ICadrartOffer): ICadrartExtendedTask[] {
-    let tasks: ICadrartExtendedTask[] = [];
-
-    offer.jobs?.forEach((job) => {
-      if (!job.tasks) {
-        return;
-      }
-
-      const jobTasks = this.extractTasksFromJob(offer, job);
-
-      tasks = [...tasks, ...jobTasks];
-    });
-
-    return tasks;
-  }
-
-  private extractTasksFromOffers(
-    articleFamily: ECadrartArticleFamily,
-    offers: ICadrartOffer[]
-  ): ICadrartExtendedTask[] {
-    let tasks: ICadrartExtendedTask[] = [];
-
-    offers.forEach((offer) => {
-      const offerTasks = this.extractTasksFromOffer(offer);
-
-      tasks = [...tasks, ...offerTasks];
-    });
-
-    return tasks.filter((task) => task.articleFamily === articleFamily);
   }
 
   @UseGuards(CadrartJwtAuthGuard)
@@ -152,7 +46,64 @@ export class CadrartTaskController extends CadrartBaseController<any> {
 
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
-      entities: this.extractTasksFromOffers(familyRouteMapping[family], result)
+      entities: extractTasksFromOffers(familyRouteMapping[family], result)
+    });
+  }
+
+  @UseGuards(CadrartJwtAuthGuard)
+  @Put('/:id/do')
+  async doTask(
+    @Res() res: Response,
+    @Param('id', ParseIntPipe) id: number
+  ): Promise<Response<{ statusCode: number; result: unknown }>> {
+    const result = await this.tasksService.doTask(id);
+
+    this.socket.socket?.emit('update', {
+      name: this.tasksService.entityName,
+      entity: { id }
+    });
+
+    return res.status(HttpStatus.OK).json({
+      statusCode: HttpStatus.OK,
+      result
+    });
+  }
+
+  @UseGuards(CadrartJwtAuthGuard)
+  @Put('/:id/undo')
+  async undoTask(
+    @Res() res: Response,
+    @Param('id', ParseIntPipe) id: number
+  ): Promise<Response<{ statusCode: number; result: unknown }>> {
+    const result = await this.tasksService.undoTask(id);
+
+    this.socket.socket?.emit('update', {
+      name: this.tasksService.entityName,
+      entity: { id }
+    });
+
+    return res.status(HttpStatus.OK).json({
+      statusCode: HttpStatus.OK,
+      result
+    });
+  }
+
+  @UseGuards(CadrartJwtAuthGuard)
+  @Put('/:id/block')
+  async blockTask(
+    @Res() res: Response,
+    @Param('id', ParseIntPipe) id: number
+  ): Promise<Response<{ statusCode: number; result: unknown }>> {
+    const result = await this.tasksService.blockTask(id);
+
+    this.socket.socket?.emit('update', {
+      name: this.tasksService.entityName,
+      entity: { id }
+    });
+
+    return res.status(HttpStatus.OK).json({
+      statusCode: HttpStatus.OK,
+      result
     });
   }
 }
