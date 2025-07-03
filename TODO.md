@@ -1,9 +1,5 @@
 # Recommendations
 
-## Immediate Actions (Critical)
-- Remove phpMyAdmin from public access
-- Add file upload validation and scanning
-
 ## Short-term (High Priority)
 - Implement rate limiting
 - Add WebSocket authentication

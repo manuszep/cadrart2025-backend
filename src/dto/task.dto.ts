@@ -1,5 +1,6 @@
 import { IsString, IsOptional, IsNumber, MaxLength, IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
+
 import { BaseDto } from './base.dto';
 
 export class CreateTaskDto extends BaseDto {

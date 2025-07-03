@@ -5,6 +5,8 @@ import { forwardRef, Inject, PipeTransform, Type } from '@nestjs/common';
 import sharp from 'sharp';
 import { ConfigService } from '@nestjs/config';
 
+import { getQualitySettings, getResizeSettings } from './config/file-upload.config';
+
 export const cadrartSharpPipe: (directory: string) => Type<PipeTransform<Express.Multer.File, Promise<string>>> =
   createCadrartSharpPipe;
 
@@ -20,23 +22,26 @@ export function createCadrartSharpPipe(directory: string): Type<PipeTransform<Ex
         fs.mkdirSync(dir, { recursive: true });
       }
 
+      const qualitySettings = getQualitySettings();
+      const resizeSettings = getResizeSettings();
+
       await sharp(image.buffer)
-        .resize(80)
-        .webp({ effort: 3 })
+        .resize(resizeSettings.small)
+        .webp({ effort: 3, quality: qualitySettings.small })
         .toFile(path.join(dir, `${filenameBase}_s.webp`));
 
       await sharp(image.buffer)
-        .resize(800)
-        .webp({ effort: 3 })
+        .resize(resizeSettings.medium)
+        .webp({ effort: 3, quality: qualitySettings.medium })
         .toFile(path.join(dir, `${filenameBase}_m.webp`));
 
       await sharp(image.buffer)
-        .resize(1600)
-        .webp({ effort: 3 })
+        .resize(resizeSettings.large)
+        .webp({ effort: 3, quality: qualitySettings.large })
         .toFile(path.join(dir, `${filenameBase}_l.webp`));
 
       await sharp(image.buffer)
-        .webp({ effort: 3 })
+        .webp({ effort: 3, quality: qualitySettings.original })
         .toFile(path.join(dir, `${filenameBase}.webp`));
 
       return filenameBase;
