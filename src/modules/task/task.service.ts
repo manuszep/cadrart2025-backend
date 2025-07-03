@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Like, Repository } from 'typeorm';
-import { CadrartJob } from 'src/entities/job.entity';
 
 import { CadrartBaseService, ICadrartBaseServiceFindParam } from '../../base/base.service';
 import { CadrartTask } from '../../entities/task.entity';
+import { CadrartJob } from '../../entities/job.entity';
 
 @Injectable()
 export class CadrartTaskService extends CadrartBaseService<CadrartTask> {

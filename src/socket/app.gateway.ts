@@ -10,7 +10,17 @@ import { Server, Socket } from 'socket.io';
 
 import { CadrartSocketService } from './socket.service';
 
-@WebSocketGateway(8001, { cors: true, path: '/ws' })
+@WebSocketGateway(8001, {
+  cors: {
+    origin:
+      process.env.NODE_ENV === 'production'
+        ? ['https://ateliercadrart.com', 'https://www.ateliercadrart.com']
+        : ['http://localhost:4200', 'http://localhost:3000'],
+    credentials: true,
+    methods: ['GET', 'POST']
+  },
+  path: '/ws'
+})
 export class CadrartAppGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   constructor(private socketService: CadrartSocketService) {}
 

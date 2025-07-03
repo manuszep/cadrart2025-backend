@@ -30,6 +30,7 @@ Cadrart Backend provides a robust REST API and WebSocket support for managing al
 - **Authentication**: JWT + Passport.js
 - **File Upload**: Multer with Sharp for image processing
 - **Real-time**: Socket.io
+- **Security**: Helmet.js
 - **Language**: TypeScript
 - **Testing**: Jest
 
