@@ -1,6 +1,7 @@
 import { Controller, HttpStatus, Post, Res, UseGuards, Get, Param, Request, Body } from '@nestjs/common';
 import { ICadrartIsLoggedInResponse } from '@manuszep/cadrart2025-common';
 import { Response } from 'express';
+import { Throttle } from '@nestjs/throttler';
 
 import { CadrartTeamMemberService } from '../team-member/team-member.service';
 import { LoginDto } from '../../dto/team-member.dto';
@@ -18,6 +19,7 @@ export class CadrartLoginController {
   ) {}
 
   @UseGuards(CadrartLocalAuthGuard)
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 login attempts per minute
   @Post('login')
   async login(
     @Body() loginDto: LoginDto,

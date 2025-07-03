@@ -5,7 +5,9 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { DataSourceOptions } from 'typeorm';
+import { ThrottlerModule } from '@nestjs/throttler';
 
+import { throttlerConfig } from './config/throttler.config';
 import { CadrartSocketModule } from './socket/socket.module';
 import {
   CadrartArticleModule,
@@ -28,6 +30,7 @@ import { CadrartAuthModule } from './modules/auth/auth.module';
     ConfigModule.forRoot({
       isGlobal: true
     }),
+    ThrottlerModule.forRoot(throttlerConfig),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {

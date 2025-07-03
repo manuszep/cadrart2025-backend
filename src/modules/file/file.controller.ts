@@ -16,6 +16,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { ICadrartErrorResponse, ICadrartFileResponse } from '@manuszep/cadrart2025-common';
+import { Throttle } from '@nestjs/throttler';
 
 import { CadrartJwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -33,6 +34,7 @@ export class CadrartFileController {
   ) {}
 
   @UseGuards(CadrartJwtAuthGuard, CadrartFileUploadGuard)
+  @Throttle({ default: { limit: 10, ttl: 3600000 } }) // 10 uploads per hour
   @Post('job')
   @UseInterceptors(FileInterceptor('file'))
   async uploadJobImage(
@@ -47,6 +49,7 @@ export class CadrartFileController {
   }
 
   @UseGuards(CadrartJwtAuthGuard, CadrartFileUploadGuard)
+  @Throttle({ default: { limit: 10, ttl: 3600000 } }) // 10 uploads per hour
   @Post('task')
   @UseInterceptors(FileInterceptor('file'))
   async uploadTaskImage(
@@ -61,6 +64,7 @@ export class CadrartFileController {
   }
 
   @UseGuards(CadrartJwtAuthGuard, CadrartFileUploadGuard)
+  @Throttle({ default: { limit: 10, ttl: 3600000 } }) // 10 uploads per hour
   @Post('team-member')
   @UseInterceptors(FileInterceptor('file'))
   async uploadTeamMemberImage(
