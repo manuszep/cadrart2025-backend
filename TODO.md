@@ -1,8 +1,6 @@
 # Recommendations
 
 ## Immediate Actions (Critical)
-- Add input validation using class-validator
-- Restrict CORS to specific origins
 - Remove phpMyAdmin from public access
 - Add file upload validation and scanning
 

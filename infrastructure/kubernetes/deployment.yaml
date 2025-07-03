@@ -72,6 +72,11 @@ spec:
                 configMapKeyRef:
                   key: ENV
                   name: cadrart-config
+            - name: CORS_ORIGINS
+              valueFrom:
+                secretKeyRef:
+                  key: CORS_ORIGINS
+                  name: cadrart-secret
           image: ghcr.io/manuszep/cadrart2025-backend
           imagePullPolicy: Always
           name: backend

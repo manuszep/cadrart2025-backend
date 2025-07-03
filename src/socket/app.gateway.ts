@@ -8,17 +8,12 @@ import {
 import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 
+import { wsCorsConfig } from '../utils/cors.config';
+
 import { CadrartSocketService } from './socket.service';
 
 @WebSocketGateway(8001, {
-  cors: {
-    origin:
-      process.env.NODE_ENV === 'production'
-        ? ['https://ateliercadrart.com', 'https://www.ateliercadrart.com']
-        : ['http://localhost:4200', 'http://localhost:3000'],
-    credentials: true,
-    methods: ['GET', 'POST']
-  },
+  cors: wsCorsConfig,
   path: '/ws'
 })
 export class CadrartAppGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {

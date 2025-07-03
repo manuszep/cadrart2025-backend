@@ -5,18 +5,11 @@ import helmet from 'helmet';
 import { ValidationPipe } from '@nestjs/common';
 
 import { CadrartAppModule } from './app.module';
+import { corsConfig } from './utils/cors.config';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(CadrartAppModule, {
-    cors: {
-      origin:
-        process.env.NODE_ENV === 'production'
-          ? ['https://ateliercadrart.com', 'https://www.ateliercadrart.com']
-          : ['http://localhost:4200', 'http://localhost:3000'],
-      credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-    },
+    cors: corsConfig,
     logger: console
   });
 
