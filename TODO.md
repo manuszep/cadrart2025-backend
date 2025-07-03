@@ -1,8 +1,6 @@
 # Recommendations
 
 ## Short-term (High Priority)
-- Implement rate limiting
-- Add WebSocket authentication
 - Configure proper TLS
 - Add resource limits to Kubernetes deployments
 - Implement security contexts

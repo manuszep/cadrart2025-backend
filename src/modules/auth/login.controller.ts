@@ -50,4 +50,11 @@ export class CadrartLoginController {
       user: user
     });
   }
+
+  @UseGuards(CadrartJwtAuthGuard)
+  @Get('websocket-token')
+  async getWebSocketToken(@Request() req: { user: ICadrartTeamMemberWithoutPassword }): Promise<{ token: string }> {
+    const token = await this.authService.login(req.user);
+    return { token: token.access_token };
+  }
 }
