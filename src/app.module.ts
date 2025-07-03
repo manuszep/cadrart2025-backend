@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
@@ -24,6 +24,7 @@ import {
 } from './modules';
 import { CadrartFileModule } from './modules/file/file.module';
 import { CadrartAuthModule } from './modules/auth/auth.module';
+import { HttpsRedirectMiddleware } from './middleware/https-redirect.middleware';
 
 @Module({
   imports: [
@@ -82,4 +83,8 @@ import { CadrartAuthModule } from './modules/auth/auth.module';
   controllers: [],
   providers: []
 })
-export class CadrartAppModule {}
+export class CadrartAppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(HttpsRedirectMiddleware).forRoutes('*');
+  }
+}

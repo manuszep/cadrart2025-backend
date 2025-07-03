@@ -6,6 +6,7 @@ import { ValidationPipe } from '@nestjs/common';
 
 import { CadrartAppModule } from './app.module';
 import { corsConfig } from './utils/cors.config';
+import { getHelmetConfig } from './config/security.config';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(CadrartAppModule, {
@@ -14,25 +15,7 @@ async function bootstrap(): Promise<void> {
   });
 
   // Security headers with Helmet.js
-  app.use(
-    helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          scriptSrc: ["'self'"],
-          imgSrc: ["'self'", 'data:', 'https:'],
-          connectSrc: ["'self'", 'wss:', 'ws:'],
-          fontSrc: ["'self'"],
-          objectSrc: ["'none'"],
-          mediaSrc: ["'self'"],
-          frameSrc: ["'none'"]
-        }
-      },
-      crossOriginEmbedderPolicy: false,
-      crossOriginResourcePolicy: { policy: 'cross-origin' }
-    })
-  );
+  app.use(helmet(getHelmetConfig()));
 
   // Global validation pipe
   app.useGlobalPipes(
@@ -51,6 +34,9 @@ async function bootstrap(): Promise<void> {
   app.use(cookieParser());
   app.setGlobalPrefix('api');
 
-  await app.listen(3000);
+  const port = process.env.PORT || 3000;
+  await app.listen(port, () => {
+    console.log(`🚀 Server running on port ${port}`);
+  });
 }
 bootstrap();
