@@ -134,5 +134,6 @@ spec:
               persistentVolumeClaim:
                 claimName: static-volume
             - name: logs-volume
-              emptyDir: {}
+              persistentVolumeClaim:
+                claimName: cadrart-logs-pvc
 status: {}
