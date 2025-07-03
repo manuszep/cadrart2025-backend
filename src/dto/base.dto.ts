@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsNumber, IsDateString, IsBoolean } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsDateString } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class BaseDto {

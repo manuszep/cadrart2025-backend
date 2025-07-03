@@ -15,9 +15,9 @@ import { CadrartBaseService, ICadrartBaseEntity } from './base.service';
 
 export class CadrartBaseValidatedController<
   T extends ICadrartBaseEntity,
-  CreateDto extends Partial<T> = any,
-  UpdateDto extends Partial<T> = any,
-  QueryDto = any
+  CreateDto extends Partial<T> = Partial<T>,
+  UpdateDto extends Partial<T> = Partial<T>,
+  QueryDto = Record<string, unknown>
 > {
   constructor(
     private readonly service: CadrartBaseService<T>,
@@ -56,7 +56,11 @@ export class CadrartBaseValidatedController<
   @UseGuards(CadrartJwtAuthGuard)
   @Get()
   async findAll(@Res() res: Response, @Query() query: QueryDto): Promise<Response<ICadrartEntitiesResponse<T>>> {
-    const result = await this.service.findAll((query as any).page, (query as any).count, (query as any).needle);
+    const result = await this.service.findAll(
+      (query as Record<string, unknown>).page as number,
+      (query as Record<string, unknown>).count as number,
+      (query as Record<string, unknown>).needle as string
+    );
 
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
@@ -121,7 +125,7 @@ export class CadrartBaseValidatedController<
   async remove(@Res() res: Response, @Param('id') id: string): Promise<Response<ICadrartResponse>> {
     try {
       await this.service.remove(id);
-    } catch (_e) {
+    } catch {
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `ERROR.API.${this.service.entityName.toUpperCase()}.DELETE`

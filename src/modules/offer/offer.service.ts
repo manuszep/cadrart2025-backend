@@ -103,7 +103,7 @@ export class CadrartOfferService extends CadrartBaseService<CadrartOffer> {
 
   async findAllStarted(): Promise<CadrartOffer[]> {
     return this.offersRepository.find({
-      where: { status: String(ECadrartOfferStatus.STATUS_STARTED) as any as ECadrartOfferStatus },
+      where: { status: ECadrartOfferStatus.STATUS_STARTED },
       order: { createdAt: 'DESC' },
       relations: ['jobs', 'jobs.tasks', 'jobs.tasks.children']
     });

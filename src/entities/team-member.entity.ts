@@ -55,7 +55,7 @@ export class CadrartTeamMember extends BaseEntity implements ICadrartTeamMember 
 
   @BeforeInsert()
   @BeforeUpdate()
-  async hashPassword() {
+  async hashPassword(): Promise<void> {
     if (this.password === '') {
       this.password = undefined;
     }

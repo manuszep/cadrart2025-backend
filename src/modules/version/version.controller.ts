@@ -1,4 +1,4 @@
-import { Controller, Get, HttpStatus, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 
@@ -8,8 +8,6 @@ export class CadrartVersionController {
 
   @Get()
   async getVersion(@Res() res: Response): Promise<Response<string>> {
-    return res
-      .status(HttpStatus.OK)
-      .send(this.configService.get('CADRART_BUILD_VERSION'));
+    return res.status(HttpStatus.OK).send(this.configService.get('CADRART_BUILD_VERSION'));
   }
 }

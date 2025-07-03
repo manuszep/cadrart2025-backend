@@ -13,7 +13,12 @@ import { CadrartJwtAuthGuard } from '../modules/auth/jwt-auth.guard';
 
 import { CadrartBaseService, ICadrartBaseEntity } from './base.service';
 
-export class CadrartBaseController<T extends ICadrartBaseEntity, CreateDto = any, UpdateDto = any, QueryDto = any> {
+export class CadrartBaseController<
+  T extends ICadrartBaseEntity,
+  CreateDto = unknown,
+  UpdateDto = unknown,
+  QueryDto = Record<string, unknown>
+> {
   constructor(
     private readonly service: CadrartBaseService<T>,
     private readonly socket: CadrartSocketService
@@ -52,8 +57,8 @@ export class CadrartBaseController<T extends ICadrartBaseEntity, CreateDto = any
   @Get()
   async findAll(@Res() res: Response, @Query() query: QueryDto): Promise<Response<ICadrartEntitiesResponse<T>>> {
     // Assume QueryDto has page, count, needle
-    const { page, count, needle } = query as any;
-    const result = await this.service.findAll(page, count, needle);
+    const { page, count, needle } = query as Record<string, unknown>;
+    const result = await this.service.findAll(page as number, count as number, needle as string);
 
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
@@ -118,7 +123,7 @@ export class CadrartBaseController<T extends ICadrartBaseEntity, CreateDto = any
   async remove(@Res() res: Response, @Param('id') id: string): Promise<Response<ICadrartResponse>> {
     try {
       await this.service.remove(id);
-    } catch (_e) {
+    } catch {
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: `ERROR.API.${this.service.entityName.toUpperCase()}.DELETE`
