@@ -70,6 +70,10 @@ ENV PORT=3000
 
 EXPOSE ${PORT}
 
+# Create log directory
+RUN mkdir -p /var/log/cadrart && \
+    chown node:node /var/log/cadrart
+
 # Copy the bundled code from the build stage to the production image
 COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
 COPY --chown=node:node --from=build /usr/src/app/dist ./dist

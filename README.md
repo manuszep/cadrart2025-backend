@@ -22,6 +22,11 @@ Cadrart Backend provides a robust REST API and WebSocket support for managing al
 - **Real-time WebSocket** communication for live updates
 - **JWT Authentication** with Passport.js
 - **File Upload** with image processing capabilities
+- **Comprehensive Monitoring & Logging** with structured logs and metrics
+- **Health Checks** for application status and readiness
+- **Performance Monitoring** with request timing and resource usage
+- **Error Tracking** with detailed error categorization
+- **Security Event Monitoring** for failed logins and suspicious activity
 
 ## 🛠 Tech Stack
 
@@ -73,6 +78,8 @@ The API is organized into the following modules:
 - **Tags** (`/api/tags`) - Categorization system
 - **Files** (`/api/files`) - File upload and management
 - **Version** (`/api/version`) - API version information
+- **Health** (`/health`) - Application health status
+- **Metrics** (`/metrics`) - Application metrics and monitoring data
 
 ## 🔌 WebSocket Events
 
@@ -114,6 +121,27 @@ The application can be deployed using:
 - **Docker** - Containerized deployment
 - **Kubernetes** - Orchestrated deployment (see `infrastructure/kubernetes/`)
 - **Traditional hosting** - Direct Node.js deployment
+
+## 📊 Monitoring & Observability
+
+The application includes comprehensive monitoring capabilities:
+
+### Health Checks
+- `GET /health` - Comprehensive health status
+- `GET /health/ready` - Readiness probe for Kubernetes
+- `GET /health/live` - Liveness probe for Kubernetes
+
+### Metrics
+- `GET /metrics` - JSON format application metrics
+- `GET /metrics/prometheus` - Prometheus-compatible metrics
+
+### Logging
+- Structured JSON logging in production
+- Request/response logging with performance metrics
+- Error tracking and categorization
+- Security event logging
+
+For detailed monitoring documentation, see [MONITORING.md](./MONITORING.md).
 
 ## 📄 License
 

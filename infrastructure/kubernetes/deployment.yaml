@@ -77,12 +77,34 @@ spec:
                 secretKeyRef:
                   key: CORS_ORIGINS
                   name: cadrart-secret
+            - name: NODE_ENV
+              value: "production"
+            - name: LOG_LEVEL
+              value: "info"
+            - name: LOG_DIRECTORY
+              value: "/var/log/cadrart"
           image: ghcr.io/manuszep/cadrart2025-backend
           imagePullPolicy: Always
           name: backend
           ports:
             - containerPort: 3000
               protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
           resources:
             requests:
               cpu: "100m"
@@ -93,6 +115,8 @@ spec:
           volumeMounts:
             - mountPath: /var/www/static
               name: static-volume
+            - mountPath: /var/log/cadrart
+              name: logs-volume
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
@@ -105,8 +129,10 @@ spec:
       imagePullSecrets:
         - name: cadrart-registry-key
       restartPolicy: Always
-      volumes:
-        - name: static-volume
-          persistentVolumeClaim:
-            claimName: static-volume
+                volumes:
+            - name: static-volume
+              persistentVolumeClaim:
+                claimName: static-volume
+            - name: logs-volume
+              emptyDir: {}
 status: {}

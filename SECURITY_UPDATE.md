@@ -1,7 +1,7 @@
-# Security Update: Domain Name Configuration
+# Security Update: Domain Name Configuration & Helmet.js Fix
 
 ## Overview
-This update removes hardcoded domain names from the source code and moves them to environment variables and Kubernetes secrets for better security and flexibility.
+This update removes hardcoded domain names from the source code and moves them to environment variables and Kubernetes secrets for better security and flexibility. Additionally, it fixes a critical Helmet.js CSP configuration issue that was preventing application startup.
 
 ## Changes Made
 
@@ -18,6 +18,11 @@ This update removes hardcoded domain names from the source code and moves them t
 - Replaced hardcoded domain names with `${DOMAIN_NAME}` template variables
 - Created `apply-ingress.sh` script for environment variable substitution
 - Added documentation and example configuration files
+
+### 4. Helmet.js CSP Configuration Fix (`src/config/security.config.ts`)
+- Fixed `upgradeInsecureRequests` directive value from `[]` to `null`
+- Resolved Content-Security-Policy startup error
+- Ensured proper CSP directive configuration
 
 ## Deployment Instructions
 
@@ -53,6 +58,7 @@ kubectl apply -f cadrart2025-backend/infrastructure/kubernetes/
 ## Files Modified
 
 - `cadrart2025-backend/src/utils/cors.config.ts`
+- `cadrart2025-backend/src/config/security.config.ts` (Helmet.js CSP fix)
 - `cadrart2025-backend/infrastructure/kubernetes/deployment.yaml`
 - `cadrart2025-common/infrastructure/kubernetes/ingress.yaml`
 - `cadrart2025-common/infrastructure/kubernetes/apply-ingress.sh` (new)

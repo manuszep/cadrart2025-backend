@@ -6,6 +6,8 @@ import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { DataSourceOptions } from 'typeorm';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
 import { throttlerConfig } from './config/throttler.config';
 import { CadrartSocketModule } from './socket/socket.module';
@@ -25,12 +27,19 @@ import {
 import { CadrartFileModule } from './modules/file/file.module';
 import { CadrartAuthModule } from './modules/auth/auth.module';
 import { HttpsRedirectMiddleware } from './middleware/https-redirect.middleware';
+import { SecurityMiddleware } from './middleware/security.middleware';
+import { LoggingMiddleware } from './middleware/logging.middleware';
+import { HealthController } from './controllers/health.controller';
+import { MetricsController } from './controllers/metrics.controller';
+import { MonitoringService } from './services/monitoring.service';
+import { ErrorLoggingInterceptor } from './interceptors/error-logging.interceptor';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true
     }),
+    EventEmitterModule.forRoot(),
     ThrottlerModule.forRoot(throttlerConfig),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -80,11 +89,17 @@ import { HttpsRedirectMiddleware } from './middleware/https-redirect.middleware'
     CadrartAuthModule,
     CadrartVersionModule
   ],
-  controllers: [],
-  providers: []
+  controllers: [HealthController, MetricsController],
+  providers: [
+    MonitoringService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ErrorLoggingInterceptor
+    }
+  ]
 })
 export class CadrartAppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(HttpsRedirectMiddleware).forRoutes('*');
+    consumer.apply(LoggingMiddleware, SecurityMiddleware, HttpsRedirectMiddleware).forRoutes('*');
   }
 }
