@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { urlencoded, json } from 'express';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
+import { ValidationPipe } from '@nestjs/common';
 
 import { CadrartAppModule } from './app.module';
 
@@ -37,6 +38,18 @@ async function bootstrap(): Promise<void> {
       },
       crossOriginEmbedderPolicy: false,
       crossOriginResourcePolicy: { policy: 'cross-origin' }
+    })
+  );
+
+  // Global validation pipe
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true
+      }
     })
   );
 

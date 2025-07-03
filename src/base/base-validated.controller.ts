@@ -13,7 +13,12 @@ import { CadrartJwtAuthGuard } from '../modules/auth/jwt-auth.guard';
 
 import { CadrartBaseService, ICadrartBaseEntity } from './base.service';
 
-export class CadrartBaseController<T extends ICadrartBaseEntity, CreateDto = any, UpdateDto = any, QueryDto = any> {
+export class CadrartBaseValidatedController<
+  T extends ICadrartBaseEntity,
+  CreateDto extends Partial<T> = any,
+  UpdateDto extends Partial<T> = any,
+  QueryDto = any
+> {
   constructor(
     private readonly service: CadrartBaseService<T>,
     private readonly socket: CadrartSocketService
@@ -35,7 +40,7 @@ export class CadrartBaseController<T extends ICadrartBaseEntity, CreateDto = any
   @UseGuards(CadrartJwtAuthGuard)
   @Post()
   async create(@Res() res: Response, @Body() body: CreateDto): Promise<Response<ICadrartEntityResponse<T>>> {
-    const entity = await this.service.create(body);
+    const entity = await this.service.create(body as unknown as T);
 
     this.socket.socket?.emit('create', {
       name: this.service.entityName,
@@ -51,9 +56,7 @@ export class CadrartBaseController<T extends ICadrartBaseEntity, CreateDto = any
   @UseGuards(CadrartJwtAuthGuard)
   @Get()
   async findAll(@Res() res: Response, @Query() query: QueryDto): Promise<Response<ICadrartEntitiesResponse<T>>> {
-    // Assume QueryDto has page, count, needle
-    const { page, count, needle } = query as any;
-    const result = await this.service.findAll(page, count, needle);
+    const result = await this.service.findAll((query as any).page, (query as any).count, (query as any).needle);
 
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
@@ -100,7 +103,7 @@ export class CadrartBaseController<T extends ICadrartBaseEntity, CreateDto = any
     @Param('id') id: string,
     @Body() body: UpdateDto
   ): Promise<Response<ICadrartEntityResponse<T>>> {
-    const entity = await this.service.update(id, body);
+    const entity = await this.service.update(id, body as unknown as T);
 
     this.socket.socket?.emit('update', {
       name: this.service.entityName,

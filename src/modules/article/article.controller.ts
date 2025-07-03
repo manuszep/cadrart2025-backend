@@ -6,14 +6,20 @@ import { CadrartBaseController } from '../../base/base.controller';
 import { CadrartArticle } from '../../entities/article.entity';
 import { CadrartSocketService } from '../../socket/socket.service';
 import { CadrartJwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CreateArticleDto, UpdateArticleDto, ArticleQueryDto } from '../../dto/article.dto';
 
 import { CadrartArticleService } from './article.service';
 
 @Controller('article')
-export class CadrartArticleController extends CadrartBaseController<CadrartArticle> {
+export class CadrartArticleController extends CadrartBaseController<
+  CadrartArticle,
+  CreateArticleDto,
+  UpdateArticleDto,
+  ArticleQueryDto
+> {
   constructor(
     private readonly articleService: CadrartArticleService,
-    private readonly localSocket: CadrartSocketService,
+    private readonly localSocket: CadrartSocketService
   ) {
     super(articleService, localSocket);
   }
@@ -24,14 +30,12 @@ export class CadrartArticleController extends CadrartBaseController<CadrartArtic
 
   @UseGuards(CadrartJwtAuthGuard)
   @Get('combinable')
-  async getCombinable(
-    @Res() res: Response,
-  ): Promise<Response<ICadrartEntitiesResponse<CadrartArticle>>> {
+  async getCombinable(@Res() res: Response): Promise<Response<ICadrartEntitiesResponse<CadrartArticle>>> {
     const entities = await this.articleService.findCombinable();
 
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
-      entities,
+      entities
     });
   }
 }

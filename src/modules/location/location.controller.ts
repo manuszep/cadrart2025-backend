@@ -7,11 +7,17 @@ import { CadrartBaseController } from '../../base/base.controller';
 import { CadrartLocation } from '../../entities/location.entity';
 import { CadrartSocketService } from '../../socket/socket.service';
 import { CadrartJwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CreateLocationDto, UpdateLocationDto, LocationQueryDto } from '../../dto/location.dto';
 
 import { CadrartLocationService } from './location.service';
 
 @Controller('location')
-export class CadrartLocationController extends CadrartBaseController<CadrartLocation> {
+export class CadrartLocationController extends CadrartBaseController<
+  CadrartLocation,
+  CreateLocationDto,
+  UpdateLocationDto,
+  LocationQueryDto
+> {
   constructor(
     private readonly locationService: CadrartLocationService,
     private readonly localSocket: CadrartSocketService

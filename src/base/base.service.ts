@@ -1,5 +1,5 @@
 import { NotFoundException } from '@nestjs/common';
-import { Repository, FindManyOptions, BaseEntity, FindOptionsWhere } from 'typeorm';
+import { Repository, FindManyOptions, BaseEntity, FindOptionsWhere, DeepPartial } from 'typeorm';
 
 interface ICadrartBaseEntityProps {
   id: number;
@@ -9,7 +9,7 @@ export interface ICadrartBaseEntity extends BaseEntity, ICadrartBaseEntityProps 
 
 export type ICadrartBaseServiceFindParam<T> = FindOptionsWhere<T> | FindOptionsWhere<T>[];
 
-export abstract class CadrartBaseService<T extends ICadrartBaseEntity> {
+export abstract class CadrartBaseService<T extends ICadrartBaseEntity, CreateDto = unknown, UpdateDto = unknown> {
   abstract entityName: string;
   protected relations: string[] = [];
   protected findOptions: FindManyOptions<T> = {};
@@ -21,9 +21,8 @@ export abstract class CadrartBaseService<T extends ICadrartBaseEntity> {
 
   constructor(protected readonly repository: Repository<T>) {}
 
-  async create(entity: T): Promise<T> {
-    const newEntity = this.repository.create(entity);
-
+  async create(dto: CreateDto): Promise<T> {
+    const newEntity = this.repository.create(dto as DeepPartial<T>);
     return this.repository.save(newEntity);
   }
 
@@ -65,20 +64,17 @@ export abstract class CadrartBaseService<T extends ICadrartBaseEntity> {
     return entity as Promise<T>;
   }
 
-  async update(id: string, updatedEntityDTO: T): Promise<T> {
+  async update(id: string, dto: UpdateDto): Promise<T> {
     const entity = await this.findOne(id);
-
     const updatedEntity = this.repository.create({
       ...entity,
-      ...updatedEntityDTO
+      ...(dto as DeepPartial<T>)
     });
-
     return this.repository.save(updatedEntity);
   }
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
-
     await this.repository.remove(entity);
   }
 }

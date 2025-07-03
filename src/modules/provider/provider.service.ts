@@ -4,9 +4,10 @@ import { Like, Repository } from 'typeorm';
 
 import { CadrartBaseService, ICadrartBaseServiceFindParam } from '../../base/base.service';
 import { CadrartProvider } from '../../entities/provider.entity';
+import { CreateProviderDto, UpdateProviderDto } from '../../dto/provider.dto';
 
 @Injectable()
-export class CadrartProviderService extends CadrartBaseService<CadrartProvider> {
+export class CadrartProviderService extends CadrartBaseService<CadrartProvider, CreateProviderDto, UpdateProviderDto> {
   entityName = 'Provider';
 
   constructor(

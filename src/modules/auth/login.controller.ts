@@ -1,8 +1,9 @@
-import { Controller, HttpStatus, Post, Res, UseGuards, Get, Param, Request } from '@nestjs/common';
+import { Controller, HttpStatus, Post, Res, UseGuards, Get, Param, Request, Body } from '@nestjs/common';
 import { ICadrartIsLoggedInResponse } from '@manuszep/cadrart2025-common';
 import { Response } from 'express';
 
 import { CadrartTeamMemberService } from '../team-member/team-member.service';
+import { LoginDto } from '../../dto/team-member.dto';
 
 import { CadrartAuthService } from './auth.service';
 import { CadrartLocalAuthGuard } from './local-auth.guard';
@@ -19,6 +20,7 @@ export class CadrartLoginController {
   @UseGuards(CadrartLocalAuthGuard)
   @Post('login')
   async login(
+    @Body() loginDto: LoginDto,
     @Request() req: { user: ICadrartTeamMemberWithoutPassword },
     @Res() res: Response
   ): Promise<Response<ICadrartIsLoggedInResponse>> {

@@ -4,9 +4,10 @@ import { Like, Repository } from 'typeorm';
 
 import { CadrartBaseService, ICadrartBaseServiceFindParam } from '../../base/base.service';
 import { CadrartTag } from '../../entities/tag.entity';
+import { CreateTagDto, UpdateTagDto } from '../../dto/tag.dto';
 
 @Injectable()
-export class CadrartTagService extends CadrartBaseService<CadrartTag> {
+export class CadrartTagService extends CadrartBaseService<CadrartTag, CreateTagDto, UpdateTagDto> {
   entityName = 'Tag';
 
   constructor(@InjectRepository(CadrartTag) private tagsRepository: Repository<CadrartTag>) {

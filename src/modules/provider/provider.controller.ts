@@ -7,11 +7,17 @@ import { CadrartBaseController } from '../../base/base.controller';
 import { CadrartProvider } from '../../entities/provider.entity';
 import { CadrartSocketService } from '../../socket/socket.service';
 import { CadrartJwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CreateProviderDto, UpdateProviderDto, ProviderQueryDto } from '../../dto/provider.dto';
 
 import { CadrartProviderService } from './provider.service';
 
 @Controller('provider')
-export class CadrartProviderController extends CadrartBaseController<CadrartProvider> {
+export class CadrartProviderController extends CadrartBaseController<
+  CadrartProvider,
+  CreateProviderDto,
+  UpdateProviderDto,
+  ProviderQueryDto
+> {
   constructor(
     private readonly providerService: CadrartProviderService,
     private readonly localSocket: CadrartSocketService
