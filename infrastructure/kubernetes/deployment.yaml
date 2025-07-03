@@ -83,7 +83,13 @@ spec:
           ports:
             - containerPort: 3000
               protocol: TCP
-          resources: {}
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
           volumeMounts:
             - mountPath: /var/www/static
               name: static-volume
