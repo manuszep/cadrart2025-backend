@@ -77,6 +77,11 @@ spec:
                 secretKeyRef:
                   key: CORS_ORIGINS
                   name: cadrart-secret
+            - name: TEST_ENDPOINT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: TEST_ENDPOINT_SECRET
+                  name: cadrart-secret
             - name: NODE_ENV
               value: "production"
             - name: LOG_LEVEL

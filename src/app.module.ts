@@ -31,6 +31,7 @@ import { SecurityMiddleware } from './middleware/security.middleware';
 import { LoggingMiddleware } from './middleware/logging.middleware';
 import { HealthController } from './controllers/health.controller';
 import { MetricsController } from './controllers/metrics.controller';
+import { TestModule } from './controllers/test.module';
 import { MonitoringService } from './services/monitoring.service';
 import { ErrorLoggingInterceptor } from './interceptors/error-logging.interceptor';
 
@@ -87,7 +88,8 @@ import { ErrorLoggingInterceptor } from './interceptors/error-logging.intercepto
     CadrartTaskModule,
     CadrartTeamMemberModule,
     CadrartAuthModule,
-    CadrartVersionModule
+    CadrartVersionModule,
+    TestModule
   ],
   controllers: [HealthController, MetricsController],
   providers: [
