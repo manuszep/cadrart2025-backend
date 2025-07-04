@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { urlencoded, json } from 'express';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 
 import { CadrartAppModule } from './app.module';
 import { corsConfig } from './utils/cors.config';
@@ -35,8 +35,10 @@ async function bootstrap(): Promise<void> {
   app.setGlobalPrefix('api');
 
   const port = process.env.PORT || 3000;
+  const logger = new Logger('Bootstrap');
+
   await app.listen(port, () => {
-    console.log(`🚀 Server running on port ${port}`);
+    logger.log(`🚀 Server running on port ${port}`);
   });
 }
 bootstrap();

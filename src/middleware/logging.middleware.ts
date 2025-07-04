@@ -33,6 +33,7 @@ export class LoggingMiddleware implements NestMiddleware {
     // Capture response data
     const originalSend = res.send;
     const logResponse = this.logResponse.bind(this);
+    const logger = this.logger;
     res.send = function (body: unknown): Response {
       try {
         const responseTime = Date.now() - (req.startTime || 0);
@@ -43,7 +44,7 @@ export class LoggingMiddleware implements NestMiddleware {
         return originalSend.call(this, body);
       } catch (error) {
         // If logging fails, still send the response
-        console.error('Logging middleware error:', error);
+        logger.error('Logging middleware error:', error);
         return originalSend.call(this, body);
       }
     };

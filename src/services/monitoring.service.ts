@@ -149,7 +149,7 @@ export class MonitoringService {
     setInterval(() => {
       this.updatePerformanceMetrics();
       this.logMetrics();
-    }, 60000); // Every minute
+    }, 3600000); // Every 1 hour
   }
 
   private logMetrics(): void {
