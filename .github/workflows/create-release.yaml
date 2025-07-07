@@ -67,36 +67,43 @@ jobs:
       - name: Determine target environment
         id: target-env
         run: |
-          # Get current ingress configuration to determine active environment
-          CURRENT_NAMESPACE=$(kubectl get ingress cadrart-ingress -n cadrart -o jsonpath='{.spec.rules[0].http.paths[0].backend.service.namespace}' 2>/dev/null || echo "cadrart")
+          # Get current production namespace from proxy service
+          CURRENT_PROD_NAMESPACE=$(kubectl get service frontend-production -n cadrart-system -o jsonpath='{.spec.externalName}' 2>/dev/null | sed 's/\.svc\.cluster\.local//' | sed 's/frontend\.//' || echo "cadrart-a")
 
           # Determine target environment (opposite of current)
-          if [[ "$CURRENT_NAMESPACE" == *"-a" ]]; then
+          if [[ "$CURRENT_PROD_NAMESPACE" == "cadrart-a" ]]; then
             TARGET_ENV="b"
             TARGET_NAMESPACE="cadrart-b"
-            STAGING_URL="stg-b.cadrart.com"  # Example staging URL
-          elif [[ "$CURRENT_NAMESPACE" == *"-b" ]]; then
+          elif [[ "$CURRENT_PROD_NAMESPACE" == "cadrart-b" ]]; then
             TARGET_ENV="a"
             TARGET_NAMESPACE="cadrart-a"
-            STAGING_URL="stg-a.cadrart.com"  # Example staging URL
           else
             # Default to environment 'a' if no specific environment detected
             TARGET_ENV="a"
             TARGET_NAMESPACE="cadrart-a"
-            STAGING_URL="stg-a.cadrart.com"  # Example staging URL
           fi
 
           echo "target-env=$TARGET_ENV" >> $GITHUB_OUTPUT
           echo "target-namespace=$TARGET_NAMESPACE" >> $GITHUB_OUTPUT
-          echo "staging-url=$STAGING_URL" >> $GITHUB_OUTPUT
-          echo "Current namespace: $CURRENT_NAMESPACE"
+          echo "current-prod=$CURRENT_PROD_NAMESPACE" >> $GITHUB_OUTPUT
+          echo "Current production: $CURRENT_PROD_NAMESPACE"
           echo "Target environment: $TARGET_ENV"
           echo "Target namespace: $TARGET_NAMESPACE"
-          echo "Staging URL: $STAGING_URL"
 
       - name: Create target namespace
         run: |
           kubectl create namespace ${{ steps.target-env.outputs.target-namespace }} --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Sync data from production to staging
+        run: |
+          # Checkout common repository for sync scripts
+          git clone https://github.com/manuszep/cadrart2025-common.git /tmp/cadrart-common
+          cd /tmp/cadrart-common/infrastructure/scripts
+          chmod +x *.sh
+
+          # Sync database and static volume
+          ./sync-database.sh ${{ steps.target-env.outputs.current-prod }} ${{ steps.target-env.outputs.target-namespace }}
+          ./sync-static-volume.sh ${{ steps.target-env.outputs.current-prod }} ${{ steps.target-env.outputs.target-namespace }}
 
       - name: Deploy to staging environment
         run: |
@@ -130,6 +137,12 @@ jobs:
             echo "Service IP not available, skipping health check"
           fi
 
+      - name: Update staging proxy services
+        run: |
+          # Update staging proxy services to point to target namespace
+          kubectl patch service frontend-staging -n cadrart-system --type='merge' -p="{\"spec\":{\"externalName\":\"frontend.${{ steps.target-env.outputs.target-namespace }}.svc.cluster.local\"}}"
+          kubectl patch service backend-staging -n cadrart-system --type='merge' -p="{\"spec\":{\"externalName\":\"backend.${{ steps.target-env.outputs.target-namespace }}.svc.cluster.local\"}}"
+
       - name: Deployment summary
         run: |
           echo "## 🚀 Backend Deployment Complete!" >> $GITHUB_STEP_SUMMARY
@@ -137,15 +150,19 @@ jobs:
           echo "**Version:** ${{ steps.tag.outputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "**Environment:** ${{ steps.target-env.outputs.target-env }}" >> $GITHUB_STEP_SUMMARY
           echo "**Namespace:** ${{ steps.target-env.outputs.target-namespace }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Staging URL:** ${{ steps.target-env.outputs.staging-url }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Staging URL:** https://stg.ateliercadrart.com" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Current State:" >> $GITHUB_STEP_SUMMARY
+          echo "  - Production (ateliercadrart.com) → ${{ steps.target-env.outputs.current-prod }}" >> $GITHUB_STEP_SUMMARY
+          echo "  - Staging (stg.ateliercadrart.com) → ${{ steps.target-env.outputs.target-namespace }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Next Steps:" >> $GITHUB_STEP_SUMMARY
-          echo "1. Test the backend deployment at: **${{ steps.target-env.outputs.staging-url }}/api**" >> $GITHUB_STEP_SUMMARY
-          echo "2. Test WebSocket connection at: **${{ steps.target-env.outputs.staging-url }}/ws**" >> $GITHUB_STEP_SUMMARY
-          echo "3. If tests pass, manually switch traffic to the new environment" >> $GITHUB_STEP_SUMMARY
+          echo "1. Test the backend deployment at: **https://stg.ateliercadrart.com/api**" >> $GITHUB_STEP_SUMMARY
+          echo "2. Test WebSocket connection at: **https://stg.ateliercadrart.com/ws**" >> $GITHUB_STEP_SUMMARY
+          echo "3. If tests pass, run the switch workflow in cadrart2025-common repository" >> $GITHUB_STEP_SUMMARY
           echo "4. Monitor the production environment after traffic switch" >> $GITHUB_STEP_SUMMARY
 
           echo "Backend deployment to ${{ steps.target-env.outputs.target-namespace }} completed successfully!"
-          echo "Staging URL: ${{ steps.target-env.outputs.staging-url }}"
+          echo "Staging URL: https://stg.ateliercadrart.com"
           echo ""
-          echo "Manual traffic switch required when ready to promote to production."
+          echo "Run the switch workflow in cadrart2025-common repository when ready to promote to production."
