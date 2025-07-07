@@ -54,3 +54,17 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Security - prevent accidental commits of sensitive files
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.env.*
+secrets/
+backups/
+backup-*/
+k8s-backup-*/
+production-data-backup-*/
+static-files-backup-*/

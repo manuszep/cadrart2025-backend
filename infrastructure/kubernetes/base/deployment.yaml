@@ -2,14 +2,17 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   creationTimestamp: null
-  name: backend
-  namespace: cadrart-$(ENVIRONMENT)
+  labels:
+    io.kompose.service: backend-$COLOR_TEST
+    environment: $COLOR_TEST
+  name: backend-$COLOR_TEST
+  namespace: cadrart
 spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: backend
-      environment: $(ENVIRONMENT_COLOR)
+      io.kompose.service: backend-$COLOR_TEST
+      environment: $COLOR_TEST
   strategy:
     type: Recreate
   template:
@@ -17,8 +20,8 @@ spec:
       creationTimestamp: null
       labels:
         io.kompose.network/cadrart-default: 'true'
-        io.kompose.service: backend
-        environment: $(ENVIRONMENT_COLOR)
+        io.kompose.service: backend-$COLOR_TEST
+        environment: $COLOR_TEST
     spec:
       containers:
         - env:
@@ -43,10 +46,7 @@ spec:
                   key: DATABASE_TYPE
                   name: cadrart-config
             - name: CADRART_DB_HOST
-              valueFrom:
-                configMapKeyRef:
-                  key: DATABASE_HOST
-                  name: cadrart-config
+              value: "db-$COLOR_TEST"
             - name: CADRART_DB_PORT
               valueFrom:
                 configMapKeyRef:
@@ -90,13 +90,13 @@ spec:
               value: "/var/log/cadrart"
           image: ghcr.io/manuszep/cadrart2025-backend
           imagePullPolicy: Always
-          name: backend
+          name: backend-$COLOR_TEST
           ports:
             - containerPort: 3000
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /health/live
+              path: /api/version
               port: 3000
             initialDelaySeconds: 30
             periodSeconds: 10
@@ -104,7 +104,7 @@ spec:
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /health/ready
+              path: /api/version
               port: 3000
             initialDelaySeconds: 5
             periodSeconds: 5
@@ -137,8 +137,8 @@ spec:
       volumes:
         - name: static-volume
           persistentVolumeClaim:
-            claimName: static-volume-$(ENVIRONMENT)
+            claimName: static-volume
         - name: logs-volume
           persistentVolumeClaim:
-            claimName: cadrart-logs-pvc-$(ENVIRONMENT)
+            claimName: cadrart-logs-pvc
 status: {}

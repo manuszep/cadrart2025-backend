@@ -39,7 +39,7 @@ jobs:
             ghcr.io/manuszep/cadrart2025-backend:${{ steps.tag.outputs.version }}
 
   deploy:
-    name: Deploy to staging environment
+    name: Deploy to production
     runs-on: ubuntu-22.04
     needs: build
     steps:
@@ -64,105 +64,15 @@ jobs:
           k8s-url: ${{ secrets.KUBERNETES_URL }}
           k8s-secret: ${{ secrets.KUBERNETES_SECRET }}
 
-      - name: Determine target environment
-        id: target-env
-        run: |
-          # Get current production namespace from proxy service
-          CURRENT_PROD_NAMESPACE=$(kubectl get service frontend-production -n cadrart-system -o jsonpath='{.spec.externalName}' 2>/dev/null | sed 's/\.svc\.cluster\.local//' | sed 's/frontend\.//' || echo "cadrart-a")
-
-          # Determine target environment (opposite of current)
-          if [[ "$CURRENT_PROD_NAMESPACE" == "cadrart-a" ]]; then
-            TARGET_ENV="b"
-            TARGET_NAMESPACE="cadrart-b"
-          elif [[ "$CURRENT_PROD_NAMESPACE" == "cadrart-b" ]]; then
-            TARGET_ENV="a"
-            TARGET_NAMESPACE="cadrart-a"
-          else
-            # Default to environment 'a' if no specific environment detected
-            TARGET_ENV="a"
-            TARGET_NAMESPACE="cadrart-a"
-          fi
-
-          echo "target-env=$TARGET_ENV" >> $GITHUB_OUTPUT
-          echo "target-namespace=$TARGET_NAMESPACE" >> $GITHUB_OUTPUT
-          echo "current-prod=$CURRENT_PROD_NAMESPACE" >> $GITHUB_OUTPUT
-          echo "Current production: $CURRENT_PROD_NAMESPACE"
-          echo "Target environment: $TARGET_ENV"
-          echo "Target namespace: $TARGET_NAMESPACE"
-
-      - name: Create target namespace
-        run: |
-          kubectl create namespace ${{ steps.target-env.outputs.target-namespace }} --dry-run=client -o yaml | kubectl apply -f -
-
-      - name: Sync data from production to staging
-        run: |
-          # Checkout common repository for sync scripts
-          git clone https://github.com/manuszep/cadrart2025-common.git /tmp/cadrart-common
-          cd /tmp/cadrart-common/infrastructure/scripts
-          chmod +x *.sh
-
-          # Sync database and static volume
-          ./sync-database.sh ${{ steps.target-env.outputs.current-prod }} ${{ steps.target-env.outputs.target-namespace }}
-          ./sync-static-volume.sh ${{ steps.target-env.outputs.current-prod }} ${{ steps.target-env.outputs.target-namespace }}
-
-      - name: Deploy to staging environment
-        run: |
-          # Use Kustomize to generate and apply configuration
-          OVERLAY_DIR="infrastructure/kubernetes/overlays/environment-${{ steps.target-env.outputs.target-env }}"
-
-          echo "Generating configuration with Kustomize..."
-          kubectl kustomize $OVERLAY_DIR | kubectl apply -f -
-
-          # Update the image tag
-          echo "Updating image to: ${{ steps.tag.outputs.version }}"
-          kubectl set image deployment/backend backend=ghcr.io/manuszep/cadrart2025-backend:${{ steps.tag.outputs.version }} -n ${{ steps.target-env.outputs.target-namespace }}
-
-      - name: Wait for deployment readiness
-        run: |
-          kubectl rollout status deployment/backend -n ${{ steps.target-env.outputs.target-namespace }} --timeout=300s
-
-      - name: Health check
-        run: |
-          # Wait a bit for the service to be fully ready
-          sleep 10
-
-          # Get the service IP/port for health check
-          SERVICE_IP=$(kubectl get service backend -n ${{ steps.target-env.outputs.target-namespace }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || echo "")
-
-          if [ -n "$SERVICE_IP" ]; then
-            # Perform health check on both HTTP and WebSocket ports
-            curl -f http://$SERVICE_IP:3000/health/live || exit 1
-            curl -f http://$SERVICE_IP:3000/health/ready || exit 1
-          else
-            echo "Service IP not available, skipping health check"
-          fi
-
-      - name: Update staging proxy services
-        run: |
-          # Update staging proxy services to point to target namespace
-          kubectl patch service frontend-staging -n cadrart-system --type='merge' -p="{\"spec\":{\"externalName\":\"frontend.${{ steps.target-env.outputs.target-namespace }}.svc.cluster.local\"}}"
-          kubectl patch service backend-staging -n cadrart-system --type='merge' -p="{\"spec\":{\"externalName\":\"backend.${{ steps.target-env.outputs.target-namespace }}.svc.cluster.local\"}}"
-
-      - name: Deployment summary
-        run: |
-          echo "## 🚀 Backend Deployment Complete!" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** ${{ steps.tag.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Environment:** ${{ steps.target-env.outputs.target-env }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Namespace:** ${{ steps.target-env.outputs.target-namespace }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Staging URL:** https://stg.ateliercadrart.com" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Current State:" >> $GITHUB_STEP_SUMMARY
-          echo "  - Production (ateliercadrart.com) → ${{ steps.target-env.outputs.current-prod }}" >> $GITHUB_STEP_SUMMARY
-          echo "  - Staging (stg.ateliercadrart.com) → ${{ steps.target-env.outputs.target-namespace }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Next Steps:" >> $GITHUB_STEP_SUMMARY
-          echo "1. Test the backend deployment at: **https://stg.ateliercadrart.com/api**" >> $GITHUB_STEP_SUMMARY
-          echo "2. Test WebSocket connection at: **https://stg.ateliercadrart.com/ws**" >> $GITHUB_STEP_SUMMARY
-          echo "3. If tests pass, run the switch workflow in cadrart2025-common repository" >> $GITHUB_STEP_SUMMARY
-          echo "4. Monitor the production environment after traffic switch" >> $GITHUB_STEP_SUMMARY
-
-          echo "Backend deployment to ${{ steps.target-env.outputs.target-namespace }} completed successfully!"
-          echo "Staging URL: https://stg.ateliercadrart.com"
-          echo ""
-          echo "Run the switch workflow in cadrart2025-common repository when ready to promote to production."
+      - name: Deploy
+        uses: Azure/k8s-deploy@v4.4
+        with:
+          action: deploy
+          namespace: cadrart
+          strategy: basic
+          imagepullsecrets: |
+            dockerconfigjson-github-com
+          manifests: |
+            ./infrastructure/kubernetes/deployment.yaml
+            ./infrastructure/kubernetes/service.yaml
+          images: ghcr.io/manuszep/cadrart2025-backend:${{ steps.tag.outputs.version }}
