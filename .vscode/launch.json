@@ -5,13 +5,72 @@
     "version": "0.2.0",
     "configurations": [
       {
-        "name": "Attach",
-        "port": 9229,
-        "request": "attach",
+        "name": "Launch Backend (NestJS)",
+        "type": "node",
+        "request": "launch",
+        "program": "${workspaceFolder}/node_modules/@nestjs/cli/bin/nest.js",
+        "args": ["start", "--watch", "--debug"],
+        "cwd": "${workspaceFolder}",
+        "console": "integratedTerminal",
+        "internalConsoleOptions": "neverOpen",
+        "env": {
+          "NODE_ENV": "development"
+        },
         "skipFiles": [
           "<node_internals>/**"
         ],
-        "type": "node"
+        "sourceMaps": true,
+        "outFiles": ["${workspaceFolder}/dist/**/*.js"]
+      },
+      {
+        "name": "Launch Backend (Debug Mode)",
+        "type": "node",
+        "request": "launch",
+        "program": "${workspaceFolder}/src/main.ts",
+        "cwd": "${workspaceFolder}",
+        "console": "integratedTerminal",
+        "internalConsoleOptions": "neverOpen",
+        "env": {
+          "NODE_ENV": "development"
+        },
+        "skipFiles": [
+          "<node_internals>/**"
+        ],
+        "sourceMaps": true,
+        "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+        "runtimeArgs": [
+          "--require", "ts-node/register",
+          "--require", "tsconfig-paths/register"
+        ]
+      },
+      {
+        "name": "Attach to Backend",
+        "type": "node",
+        "request": "attach",
+        "port": 9229,
+        "skipFiles": [
+          "<node_internals>/**"
+        ],
+        "sourceMaps": true,
+        "outFiles": ["${workspaceFolder}/dist/**/*.js"]
+      },
+      {
+        "name": "Debug Backend Tests",
+        "type": "node",
+        "request": "launch",
+        "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
+        "args": ["--runInBand", "--no-cache"],
+        "cwd": "${workspaceFolder}",
+        "console": "integratedTerminal",
+        "internalConsoleOptions": "neverOpen",
+        "env": {
+          "NODE_ENV": "test"
+        },
+        "skipFiles": [
+          "<node_internals>/**"
+        ],
+        "sourceMaps": true,
+        "outFiles": ["${workspaceFolder}/dist/**/*.js"]
       }
     ]
 }
