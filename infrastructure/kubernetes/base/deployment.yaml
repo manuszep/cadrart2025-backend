@@ -2,17 +2,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   creationTimestamp: null
-  labels:
-    io.kompose.service: backend
-    environment: green
   name: backend
-  namespace: cadrart-b
+  namespace: cadrart-$(ENVIRONMENT)
 spec:
   replicas: 1
   selector:
     matchLabels:
       io.kompose.service: backend
-      environment: green
+      environment: $(ENVIRONMENT_COLOR)
   strategy:
     type: Recreate
   template:
@@ -21,7 +18,7 @@ spec:
       labels:
         io.kompose.network/cadrart-default: 'true'
         io.kompose.service: backend
-        environment: green
+        environment: $(ENVIRONMENT_COLOR)
     spec:
       containers:
         - env:
@@ -140,8 +137,8 @@ spec:
       volumes:
         - name: static-volume
           persistentVolumeClaim:
-            claimName: static-volume-b
+            claimName: static-volume-$(ENVIRONMENT)
         - name: logs-volume
           persistentVolumeClaim:
-            claimName: cadrart-logs-pvc-b
+            claimName: cadrart-logs-pvc-$(ENVIRONMENT)
 status: {}

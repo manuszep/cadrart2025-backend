@@ -99,17 +99,16 @@ jobs:
           kubectl create namespace ${{ steps.target-env.outputs.target-namespace }} --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Deploy to staging environment
-        uses: Azure/k8s-deploy@v4.4
-        with:
-          action: deploy
-          namespace: ${{ steps.target-env.outputs.target-namespace }}
-          strategy: basic
-          imagepullsecrets: |
-            dockerconfigjson-github-com
-          manifests: |
-            ./infrastructure/kubernetes/deployment-${{ steps.target-env.outputs.target-env }}.yaml
-            ./infrastructure/kubernetes/service-${{ steps.target-env.outputs.target-env }}.yaml
-          images: ghcr.io/manuszep/cadrart2025-backend:${{ steps.tag.outputs.version }}
+        run: |
+          # Use Kustomize to generate and apply configuration
+          OVERLAY_DIR="infrastructure/kubernetes/overlays/environment-${{ steps.target-env.outputs.target-env }}"
+
+          echo "Generating configuration with Kustomize..."
+          kubectl kustomize $OVERLAY_DIR | kubectl apply -f -
+
+          # Update the image tag
+          echo "Updating image to: ${{ steps.tag.outputs.version }}"
+          kubectl set image deployment/backend backend=ghcr.io/manuszep/cadrart2025-backend:${{ steps.tag.outputs.version }} -n ${{ steps.target-env.outputs.target-namespace }}
 
       - name: Wait for deployment readiness
         run: |
