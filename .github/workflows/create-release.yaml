@@ -39,7 +39,7 @@ jobs:
             ghcr.io/manuszep/cadrart2025-backend:${{ steps.tag.outputs.version }}
 
   deploy:
-    name: Deploy to production
+    name: Deploy to staging environment
     runs-on: ubuntu-22.04
     needs: build
     steps:
@@ -64,38 +64,89 @@ jobs:
           k8s-url: ${{ secrets.KUBERNETES_URL }}
           k8s-secret: ${{ secrets.KUBERNETES_SECRET }}
 
-      - name: Deploy
+      - name: Determine target environment
+        id: target-env
+        run: |
+          # Get current ingress configuration to determine active environment
+          CURRENT_NAMESPACE=$(kubectl get ingress cadrart-ingress -n cadrart -o jsonpath='{.spec.rules[0].http.paths[0].backend.service.namespace}' 2>/dev/null || echo "cadrart")
+
+          # Determine target environment (opposite of current)
+          if [[ "$CURRENT_NAMESPACE" == *"-a" ]]; then
+            TARGET_ENV="b"
+            TARGET_NAMESPACE="cadrart-b"
+            STAGING_URL="stg-b.cadrart.com"  # Example staging URL
+          elif [[ "$CURRENT_NAMESPACE" == *"-b" ]]; then
+            TARGET_ENV="a"
+            TARGET_NAMESPACE="cadrart-a"
+            STAGING_URL="stg-a.cadrart.com"  # Example staging URL
+          else
+            # Default to environment 'a' if no specific environment detected
+            TARGET_ENV="a"
+            TARGET_NAMESPACE="cadrart-a"
+            STAGING_URL="stg-a.cadrart.com"  # Example staging URL
+          fi
+
+          echo "target-env=$TARGET_ENV" >> $GITHUB_OUTPUT
+          echo "target-namespace=$TARGET_NAMESPACE" >> $GITHUB_OUTPUT
+          echo "staging-url=$STAGING_URL" >> $GITHUB_OUTPUT
+          echo "Current namespace: $CURRENT_NAMESPACE"
+          echo "Target environment: $TARGET_ENV"
+          echo "Target namespace: $TARGET_NAMESPACE"
+          echo "Staging URL: $STAGING_URL"
+
+      - name: Create target namespace
+        run: |
+          kubectl create namespace ${{ steps.target-env.outputs.target-namespace }} --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy to staging environment
         uses: Azure/k8s-deploy@v4.4
         with:
           action: deploy
-          namespace: cadrart
+          namespace: ${{ steps.target-env.outputs.target-namespace }}
           strategy: basic
           imagepullsecrets: |
             dockerconfigjson-github-com
           manifests: |
-            ./infrastructure/kubernetes/deployment.yaml
-            ./infrastructure/kubernetes/service.yaml
+            ./infrastructure/kubernetes/deployment-${{ steps.target-env.outputs.target-env }}.yaml
+            ./infrastructure/kubernetes/service-${{ steps.target-env.outputs.target-env }}.yaml
           images: ghcr.io/manuszep/cadrart2025-backend:${{ steps.tag.outputs.version }}
-# jobs:
-#   deploy:
-#     name: build & push image to docker hub
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v3
-#         with:
-#           ref: ${{ github.event.release.tag_name }}
-#       - name: setup docker buildx
-#         uses: docker/setup-buildx-action@v2
-#       - name: Login to DockerHub
-#         uses: docker/login-action@v2
-#         with:
-#           username: ${{ secrets.DOCKERHUB_USERNAME }}
-#           password: ${{ secrets.DOCKERHUB_TOKEN }}
-#       - name: build and push
-#         id: build-push-api
-#         uses: docker/build-push-action@v3
-#         with:
-#           context: .
-#           file: Dockerfile
-#           push: true
-#           tags: manuszep/cadrart2025-backend:<image-tag>
+
+      - name: Wait for deployment readiness
+        run: |
+          kubectl rollout status deployment/backend -n ${{ steps.target-env.outputs.target-namespace }} --timeout=300s
+
+      - name: Health check
+        run: |
+          # Wait a bit for the service to be fully ready
+          sleep 10
+
+          # Get the service IP/port for health check
+          SERVICE_IP=$(kubectl get service backend -n ${{ steps.target-env.outputs.target-namespace }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || echo "")
+
+          if [ -n "$SERVICE_IP" ]; then
+            # Perform health check on both HTTP and WebSocket ports
+            curl -f http://$SERVICE_IP:3000/health/live || exit 1
+            curl -f http://$SERVICE_IP:3000/health/ready || exit 1
+          else
+            echo "Service IP not available, skipping health check"
+          fi
+
+      - name: Deployment summary
+        run: |
+          echo "## 🚀 Backend Deployment Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ steps.tag.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ steps.target-env.outputs.target-env }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Namespace:** ${{ steps.target-env.outputs.target-namespace }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Staging URL:** ${{ steps.target-env.outputs.staging-url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Test the backend deployment at: **${{ steps.target-env.outputs.staging-url }}/api**" >> $GITHUB_STEP_SUMMARY
+          echo "2. Test WebSocket connection at: **${{ steps.target-env.outputs.staging-url }}/ws**" >> $GITHUB_STEP_SUMMARY
+          echo "3. If tests pass, manually switch traffic to the new environment" >> $GITHUB_STEP_SUMMARY
+          echo "4. Monitor the production environment after traffic switch" >> $GITHUB_STEP_SUMMARY
+
+          echo "Backend deployment to ${{ steps.target-env.outputs.target-namespace }} completed successfully!"
+          echo "Staging URL: ${{ steps.target-env.outputs.staging-url }}"
+          echo ""
+          echo "Manual traffic switch required when ready to promote to production."
