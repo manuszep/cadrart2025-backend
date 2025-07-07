@@ -64,15 +64,24 @@ jobs:
           k8s-url: ${{ secrets.KUBERNETES_URL }}
           k8s-secret: ${{ secrets.KUBERNETES_SECRET }}
 
-      - name: Deploy
-        uses: Azure/k8s-deploy@v4.4
-        with:
-          action: deploy
-          namespace: cadrart
-          strategy: basic
-          imagepullsecrets: |
-            dockerconfigjson-github-com
-          manifests: |
-            ./infrastructure/kubernetes/deployment.yaml
-            ./infrastructure/kubernetes/service.yaml
-          images: ghcr.io/manuszep/cadrart2025-backend:${{ steps.tag.outputs.version }}
+      - name: Get current test environment
+        id: get-env
+        run: |
+          COLOR_TEST=$(kubectl get configmap environment-config -n cadrart -o jsonpath='{.data.COLOR_TEST}')
+          echo "COLOR_TEST=$COLOR_TEST" >> $GITHUB_ENV
+          echo "Current test environment: $COLOR_TEST"
+
+      - name: Deploy with variable substitution
+        run: |
+          # Create temporary files with variable substitution
+          sed "s/\$COLOR_TEST/$COLOR_TEST/g" ./infrastructure/kubernetes/base/deployment.yaml > /tmp/Deployment_backend-$COLOR_TEST
+          sed "s/\$COLOR_TEST/$COLOR_TEST/g" ./infrastructure/kubernetes/base/service.yaml > /tmp/Service_backend-$COLOR_TEST
+
+          # Apply the substituted manifests
+          kubectl apply -f /tmp/Deployment_backend-$COLOR_TEST,/tmp/Service_backend-$COLOR_TEST --insecure-skip-tls-verify --namespace cadrart
+
+          # Update the image
+          kubectl set image deployment/backend-$COLOR_TEST backend-$COLOR_TEST=ghcr.io/manuszep/cadrart2025-backend:${{ steps.tag.outputs.version }} -n cadrart
+
+          # Wait for rollout
+          kubectl rollout status deployment/backend-$COLOR_TEST -n cadrart
