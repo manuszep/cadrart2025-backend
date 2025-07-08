@@ -84,6 +84,8 @@ spec:
                   name: cadrart-secret
             - name: NODE_ENV
               value: "production"
+            - name: TLS_ENABLED
+              value: "false"
             - name: LOG_LEVEL
               value: "info"
             - name: LOG_DIRECTORY

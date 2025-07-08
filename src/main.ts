@@ -32,6 +32,10 @@ async function bootstrap(): Promise<void> {
   app.use(json({ limit: '10mb' }));
   app.use(urlencoded({ extended: true, limit: '10mb' }));
   app.use(cookieParser());
+
+  // Trust proxy for correct req.secure detection behind ingress
+  app.getHttpAdapter().getInstance().set('trust proxy', true);
+
   app.setGlobalPrefix('api');
 
   const port = process.env.PORT || 3000;

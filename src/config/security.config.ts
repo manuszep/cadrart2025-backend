@@ -12,7 +12,7 @@ export interface ISecurityConfig {
 
 export function getSecurityConfig(): ISecurityConfig {
   const isProduction = process.env.NODE_ENV === 'production';
-  const tlsEnabled = process.env.TLS_ENABLED === 'true' || isProduction;
+  const tlsEnabled = process.env.TLS_ENABLED === 'true' || (isProduction && process.env.TLS_ENABLED !== 'false');
 
   return {
     enableHsts: tlsEnabled && isProduction,
