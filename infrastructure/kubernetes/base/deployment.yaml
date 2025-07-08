@@ -46,7 +46,7 @@ spec:
                   key: DATABASE_TYPE
                   name: cadrart-config
             - name: CADRART_DB_HOST
-              value: "db-$COLOR_TEST"
+              value: "db"
             - name: CADRART_DB_PORT
               valueFrom:
                 configMapKeyRef:
