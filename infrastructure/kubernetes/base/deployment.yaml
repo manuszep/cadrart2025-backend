@@ -96,16 +96,18 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /api/version
+              path: /api/health/live
               port: 3000
+              scheme: HTTP
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /api/version
+              path: /api/health/ready
               port: 3000
+              scheme: HTTP
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 3
