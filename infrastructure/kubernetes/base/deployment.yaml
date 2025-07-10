@@ -25,6 +25,11 @@ spec:
     spec:
       containers:
         - env:
+            - name: METRICS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: metrics-api-key
+                  name: cadrart-metrics-secret
             - name: CADRART_DB_DATABASE
               valueFrom:
                 configMapKeyRef:

@@ -31,8 +31,8 @@ export class ErrorLoggingInterceptor implements NestInterceptor {
           errorType = error.name;
         }
 
-        // Record error in monitoring service
-        this.monitoringService.recordError(errorType, error);
+        // Record error in monitoring service with endpoint information
+        this.monitoringService.recordError(errorType, error, request.url);
 
         // Log detailed error information
         const errorLog = {

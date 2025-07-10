@@ -33,7 +33,10 @@ import { HealthController } from './controllers/health.controller';
 import { MetricsController } from './controllers/metrics.controller';
 import { TestModule } from './controllers/test.module';
 import { MonitoringService } from './services/monitoring.service';
+import { DatabaseMetricsService } from './services/database-metrics.service';
+import { BusinessMetricsService } from './services/business-metrics.service';
 import { ErrorLoggingInterceptor } from './interceptors/error-logging.interceptor';
+import { MetricsAuthGuard } from './guards/metrics-auth.guard';
 
 @Module({
   imports: [
@@ -94,6 +97,9 @@ import { ErrorLoggingInterceptor } from './interceptors/error-logging.intercepto
   controllers: [HealthController, MetricsController],
   providers: [
     MonitoringService,
+    DatabaseMetricsService,
+    BusinessMetricsService,
+    MetricsAuthGuard,
     {
       provide: APP_INTERCEPTOR,
       useClass: ErrorLoggingInterceptor

@@ -1,8 +1,10 @@
 import * as os from 'os';
 
-import { Controller, Get, HttpStatus, Res } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
+
+import { MetricsAuthGuard } from '../guards/metrics-auth.guard';
 
 interface IHealthStatus {
   status: 'healthy' | 'unhealthy' | 'degraded';
@@ -12,13 +14,9 @@ interface IHealthStatus {
   environment: string;
   system: {
     memory: {
-      total: number;
-      used: number;
-      free: number;
       percentage: number;
     };
     cpu: {
-      loadAverage: number[];
       cores: number;
     };
     platform: string;
@@ -30,12 +28,40 @@ interface IHealthStatus {
   };
 }
 
+interface IPublicHealthStatus {
+  status: 'healthy' | 'unhealthy' | 'degraded';
+  timestamp: string;
+  version: string;
+}
+
 @Controller('health')
 export class HealthController {
   constructor(private readonly configService: ConfigService) {}
 
   @Get()
-  async getHealth(@Res() res: Response): Promise<Response<IHealthStatus>> {
+  async getHealth(@Res() res: Response): Promise<Response<IPublicHealthStatus>> {
+    const healthStatus = await this.getHealthStatus();
+
+    const statusCode =
+      healthStatus.status === 'healthy'
+        ? HttpStatus.OK
+        : healthStatus.status === 'degraded'
+          ? HttpStatus.OK
+          : HttpStatus.SERVICE_UNAVAILABLE;
+
+    // Only return public health information
+    const publicHealth: IPublicHealthStatus = {
+      status: healthStatus.status,
+      timestamp: healthStatus.timestamp,
+      version: healthStatus.version
+    };
+
+    return res.status(statusCode).json(publicHealth);
+  }
+
+  @Get('detailed')
+  @UseGuards(MetricsAuthGuard)
+  async getDetailedHealth(@Res() res: Response): Promise<Response<IHealthStatus>> {
     const healthStatus = await this.getHealthStatus();
 
     const statusCode =
@@ -82,13 +108,9 @@ export class HealthController {
       environment: this.configService.get('NODE_ENV') || 'development',
       system: {
         memory: {
-          total: totalMemory,
-          used: usedMemory,
-          free: freeMemory,
           percentage: Math.round(memoryPercentage * 100) / 100
         },
         cpu: {
-          loadAverage: os.loadavg(),
           cores: os.cpus().length
         },
         platform: os.platform(),

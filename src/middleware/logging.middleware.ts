@@ -79,8 +79,8 @@ export class LoggingMiddleware implements NestMiddleware {
       timestamp: new Date().toISOString()
     };
 
-    // Record metrics
-    this.monitoringService.recordRequest(res.statusCode < 400, responseTime);
+    // Record metrics with endpoint and method information
+    this.monitoringService.recordRequest(res.statusCode < 400, responseTime, req.url, req.method);
 
     // Log level based on status code
     if (res.statusCode >= 400) {
