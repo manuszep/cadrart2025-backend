@@ -164,7 +164,7 @@ export class MetricsController {
     // Performance metrics - Memory and CPU
     lines.push(`# HELP cadrart_process_memory_usage_bytes Memory usage in bytes`);
     lines.push(`# TYPE cadrart_process_memory_usage_bytes gauge`);
-    lines.push(`cadrart_process_memory_usage_bytes ${metrics.performance.memoryUsage * 1024 * 1024}`);
+    lines.push(`cadrart_process_memory_usage_bytes ${metrics.performance.memoryUsage}`);
 
     lines.push(`# HELP cadrart_process_memory_trend Memory usage trend (positive = increasing)`);
     lines.push(`# TYPE cadrart_process_memory_trend gauge`);

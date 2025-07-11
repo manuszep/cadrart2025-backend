@@ -315,7 +315,7 @@ export class MonitoringService {
 
   updatePerformanceMetrics(): void {
     const memoryUsage = process.memoryUsage();
-    this._metrics.performance.memoryUsage = memoryUsage.heapUsed / memoryUsage.heapTotal;
+    this._metrics.performance.memoryUsage = memoryUsage.heapUsed; // Use actual bytes
 
     // Simple CPU usage approximation
     const startUsage = process.cpuUsage();
