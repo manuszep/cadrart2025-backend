@@ -95,6 +95,8 @@ spec:
               value: "info"
             - name: LOG_DIRECTORY
               value: "/var/log/cadrart"
+            - name: DEPLOYMENT_COLOR
+              value: "$COLOR_TEST"
           image: ghcr.io/manuszep/cadrart2025-backend
           imagePullPolicy: Always
           name: backend-$COLOR_TEST

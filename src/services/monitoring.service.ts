@@ -232,6 +232,7 @@ export class MonitoringService {
       '/metrics/prometheus',
       '/health',
       '/version',
+      '/version/info',
       '/test',
       '/test/setup',
       '/test/cleanup',
