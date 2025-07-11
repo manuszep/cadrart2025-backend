@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 
 import { CadrartAuthModule } from '../modules/auth/auth.module';
+import { MonitoringModule } from '../services/monitoring.module';
 
 import { CadrartAppGateway } from './app.gateway';
 import { CadrartSocketService } from './socket.service';
@@ -13,6 +14,7 @@ import { WsAuthGuard } from './ws-auth.guard';
   imports: [
     CadrartAuthModule,
     ConfigModule,
+    MonitoringModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (config: ConfigService) => ({

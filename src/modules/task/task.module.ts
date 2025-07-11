@@ -5,7 +5,7 @@ import { CadrartOfferService } from '../offer/offer.service';
 import { CadrartOffer } from '../../entities/offer.entity';
 import { CadrartTask } from '../../entities/task.entity';
 import { CadrartJob } from '../../entities/job.entity';
-import { MonitoringService } from '../../services/monitoring.service';
+import { MonitoringModule } from '../../services/monitoring.module';
 
 import { CadrartTaskController } from './task.controller';
 import { CadrartTaskService } from './task.service';
@@ -14,9 +14,10 @@ import { CadrartTaskService } from './task.service';
   imports: [
     TypeOrmModule.forFeature([CadrartOffer]),
     TypeOrmModule.forFeature([CadrartTask]),
-    TypeOrmModule.forFeature([CadrartJob])
+    TypeOrmModule.forFeature([CadrartJob]),
+    MonitoringModule
   ],
   controllers: [CadrartTaskController],
-  providers: [CadrartOfferService, CadrartTaskService, MonitoringService]
+  providers: [CadrartOfferService, CadrartTaskService]
 })
 export class CadrartTaskModule {}

@@ -8,6 +8,7 @@ import { DataSourceOptions } from 'typeorm';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { JwtModule } from '@nestjs/jwt';
 
 import { throttlerConfig } from './config/throttler.config';
 import { CadrartSocketModule } from './socket/socket.module';
@@ -32,9 +33,7 @@ import { LoggingMiddleware } from './middleware/logging.middleware';
 import { HealthController } from './controllers/health.controller';
 import { MetricsController } from './controllers/metrics.controller';
 import { TestModule } from './controllers/test.module';
-import { MonitoringService } from './services/monitoring.service';
-import { DatabaseMetricsService } from './services/database-metrics.service';
-import { BusinessMetricsService } from './services/business-metrics.service';
+import { MonitoringModule } from './services/monitoring.module';
 import { ErrorLoggingInterceptor } from './interceptors/error-logging.interceptor';
 import { MetricsAuthGuard } from './guards/metrics-auth.guard';
 
@@ -78,6 +77,8 @@ import { MetricsAuthGuard } from './guards/metrics-auth.guard';
     MulterModule.register({
       storage: memoryStorage()
     }),
+    JwtModule.register({}),
+    MonitoringModule,
     CadrartSocketModule,
     CadrartArticleModule,
     CadrartClientModule,
@@ -96,9 +97,6 @@ import { MetricsAuthGuard } from './guards/metrics-auth.guard';
   ],
   controllers: [HealthController, MetricsController],
   providers: [
-    MonitoringService,
-    DatabaseMetricsService,
-    BusinessMetricsService,
     MetricsAuthGuard,
     {
       provide: APP_INTERCEPTOR,
