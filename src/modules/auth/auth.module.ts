@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { CadrartTeamMemberModule } from '../team-member/team-member.module';
+import { MonitoringService } from '../../services/monitoring.service';
 
 import { CadrartAuthService } from './auth.service';
 import { CadrartLoginController } from './login.controller';
@@ -25,7 +26,7 @@ import { CadrartJwtStrategy } from './jwt.strategy';
     CadrartTeamMemberModule
   ],
   controllers: [CadrartLoginController],
-  providers: [CadrartAuthService, CadrartLocalStrategy, CadrartJwtStrategy],
+  providers: [CadrartAuthService, CadrartLocalStrategy, CadrartJwtStrategy, MonitoringService],
   exports: [CadrartAuthService]
 })
 export class CadrartAuthModule {}

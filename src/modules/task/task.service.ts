@@ -5,6 +5,7 @@ import { Like, Repository } from 'typeorm';
 import { CadrartBaseService, ICadrartBaseServiceFindParam } from '../../base/base.service';
 import { CadrartTask } from '../../entities/task.entity';
 import { CadrartJob } from '../../entities/job.entity';
+import { MonitoringService } from '../../services/monitoring.service';
 
 @Injectable()
 export class CadrartTaskService extends CadrartBaseService<CadrartTask> {
@@ -12,7 +13,8 @@ export class CadrartTaskService extends CadrartBaseService<CadrartTask> {
 
   constructor(
     @InjectRepository(CadrartTask) private tasksRepository: Repository<CadrartTask>,
-    @InjectRepository(CadrartJob) private jobsRepository: Repository<CadrartJob>
+    @InjectRepository(CadrartJob) private jobsRepository: Repository<CadrartJob>,
+    private monitoringService: MonitoringService
   ) {
     super(tasksRepository);
   }
@@ -45,11 +47,18 @@ export class CadrartTaskService extends CadrartBaseService<CadrartTask> {
 
     await this.tasksRepository.update(id, { doneCount: task.doneCount + 1 });
 
-    // Return the updated task
-    return this.tasksRepository.findOne({
+    // Check if task is now completed
+    const updatedTask = await this.tasksRepository.findOne({
       where: { id },
       relations: ['job']
     });
+
+    if (updatedTask.doneCount === job.count) {
+      // Record task completion
+      this.monitoringService.recordBusinessEvent('taskCompleted');
+    }
+
+    return updatedTask;
   }
 
   async undoTask(id: number): Promise<CadrartTask> {

@@ -19,6 +19,7 @@ import { ICadrartErrorResponse, ICadrartFileResponse } from '@manuszep/cadrart20
 import { Throttle } from '@nestjs/throttler';
 
 import { CadrartJwtAuthGuard } from '../auth/jwt-auth.guard';
+import { MonitoringService } from '../../services/monitoring.service';
 
 import { CadrartFileUploadGuard } from './guards/file-upload.guard';
 import { CadrartFileValidationService } from './services/file-validation.service';
@@ -30,7 +31,8 @@ import { FileUploadDto } from './dto/file-upload.dto';
 export class CadrartFileController {
   constructor(
     private readonly config: ConfigService,
-    private readonly validationService: CadrartFileValidationService
+    private readonly validationService: CadrartFileValidationService,
+    private readonly monitoringService: MonitoringService
   ) {}
 
   @UseGuards(CadrartJwtAuthGuard, CadrartFileUploadGuard)
@@ -57,6 +59,9 @@ export class CadrartFileController {
     @UploadedFile(cadrartEnhancedSharpPipe('task')) file: string,
     @Body() _uploadDto: FileUploadDto
   ): Promise<Response<ICadrartFileResponse>> {
+    // Record file upload
+    this.monitoringService.recordBusinessEvent('fileUploaded');
+
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
       file: file

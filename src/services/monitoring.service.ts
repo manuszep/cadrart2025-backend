@@ -209,6 +209,11 @@ export class MonitoringService {
       this._metrics.requests.byMethod[method] = (this._metrics.requests.byMethod[method] || 0) + 1;
     }
 
+    // Update average response time
+    const totalRequests = this._metrics.requests.total;
+    const currentTotal = this._metrics.requests.averageResponseTime * (totalRequests - 1);
+    this._metrics.requests.averageResponseTime = (currentTotal + responseTime) / totalRequests;
+
     // Update time-series data
     this.updateTimeSeriesData(responseTime, successful);
 
@@ -488,6 +493,18 @@ export class MonitoringService {
     this._metrics.timeSeries.responseTimes = this._timeSeriesData.responseTimes;
     this._metrics.timeSeries.memoryUsage = this._timeSeriesData.memoryUsage;
     this._metrics.timeSeries.cpuUsage = this._timeSeriesData.cpuUsage;
+
+    // Update request rates in time series (calculate from request window)
+    const recentRequestRate =
+      this._requestWindow.length > 0 ? this._requestWindow.reduce((sum, entry) => sum + entry.count, 0) / 60 : 0;
+    this._metrics.timeSeries.requestRates.push(recentRequestRate);
+
+    // Keep requestRates array in sync with other time series data
+    if (this._metrics.timeSeries.requestRates.length > this._timeSeriesData.timestamps.length) {
+      this._metrics.timeSeries.requestRates = this._metrics.timeSeries.requestRates.slice(
+        -this._timeSeriesData.timestamps.length
+      );
+    }
   }
 
   private updateRateCalculations(): void {
@@ -547,10 +564,10 @@ export class MonitoringService {
   private updateWebSocketRates(): void {
     // Calculate WebSocket message rate (messages per second)
     this._metrics.websocket.messageRate =
-      (this._metrics.websocket.messagesSent + this._metrics.websocket.messagesReceived) / 60;
+      (this._metrics.websocket.messagesSent + this._metrics.websocket.messagesReceived) / 60; // per second
 
     // Calculate connection rate (connections per minute)
-    this._metrics.websocket.connectionRate = this._metrics.websocket.activeConnections / 60;
+    this._metrics.websocket.connectionRate = this._metrics.websocket.activeConnections; // per minute (current count)
   }
 
   private updateBusinessRates(): void {
@@ -572,9 +589,22 @@ export class MonitoringService {
     this._metrics.performance.databaseQueryTime = 0; // Will be calculated from query metrics
     this._metrics.performance.databaseQueryRate = queryMetrics.activeQueries;
 
-    // Update business metrics
+    // Update business metrics (preserve rate calculations)
     const businessMetrics = await this.businessMetricsService.getBusinessMetrics();
-    this._metrics.business = { ...this._metrics.business, ...businessMetrics };
+    const currentRates = {
+      offerCreationRate: this._metrics.business.offerCreationRate,
+      taskCompletionRate: this._metrics.business.taskCompletionRate,
+      userActivityRate: this._metrics.business.userActivityRate
+    };
+
+    this._metrics.business = {
+      ...this._metrics.business,
+      ...businessMetrics,
+      ...currentRates // Preserve calculated rates
+    };
+
+    // Update active connections (approximation based on request activity)
+    this._metrics.performance.activeConnections = this._requestWindow.length;
 
     // Calculate trends (simple linear regression over last 10 points)
     this.calculateTrends();
@@ -627,5 +657,10 @@ export class MonitoringService {
     );
     this._timeSeriesData.memoryUsage = this._timeSeriesData.memoryUsage.slice(-this._timeSeriesData.timestamps.length);
     this._timeSeriesData.cpuUsage = this._timeSeriesData.cpuUsage.slice(-this._timeSeriesData.timestamps.length);
+
+    // Clean up requestRates array to match other time series data
+    this._metrics.timeSeries.requestRates = this._metrics.timeSeries.requestRates.slice(
+      -this._timeSeriesData.timestamps.length
+    );
   }
 }

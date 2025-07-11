@@ -5,6 +5,7 @@ import { ECadrartOfferStatus } from '@manuszep/cadrart2025-common';
 
 import { CadrartBaseService, ICadrartBaseServiceFindParam } from '../../base/base.service';
 import { CadrartOffer } from '../../entities/offer.entity';
+import { MonitoringService } from '../../services/monitoring.service';
 
 /**
  *  Generate a new offer number in the format yyyymm-xxxx
@@ -43,7 +44,8 @@ export class CadrartOfferService extends CadrartBaseService<CadrartOffer> {
 
   constructor(
     @InjectRepository(CadrartOffer)
-    private offersRepository: Repository<CadrartOffer>
+    private offersRepository: Repository<CadrartOffer>,
+    private monitoringService: MonitoringService
   ) {
     super(offersRepository);
   }
@@ -54,7 +56,12 @@ export class CadrartOfferService extends CadrartBaseService<CadrartOffer> {
 
     newOffer.number = generateOfferNumber(latestOffer);
 
-    return this.offersRepository.save(newOffer);
+    const savedOffer = await this.offersRepository.save(newOffer);
+
+    // Record offer creation
+    this.monitoringService.recordBusinessEvent('offerCreated');
+
+    return savedOffer;
   }
 
   async findAll(
