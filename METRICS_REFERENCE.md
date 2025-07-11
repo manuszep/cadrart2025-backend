@@ -34,9 +34,9 @@ curl -H "Authorization: Bearer $METRICS_API_KEY" \
 
 ### `cadrart_http_requests_total`
 - **Type**: Counter
-- **Description**: Total number of HTTP requests
-- **Labels**: `status` (success/error)
-- **Example**: `cadrart_http_requests_total{status="success"} 150`
+- **Description**: Total number of HTTP requests (excludes technical endpoints like /metrics, /health, /version, /test)
+- **Labels**: `status` (success/error), `type` (business)
+- **Example**: `cadrart_http_requests_total{status="success",type="business"} 150`
 
 ### `cadrart_http_request_rate_requests_per_second`
 - **Type**: Gauge

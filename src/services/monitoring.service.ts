@@ -191,6 +191,11 @@ export class MonitoringService {
   }
 
   recordRequest(successful: boolean, responseTime: number, endpoint?: string, method?: string): void {
+    // Skip recording for technical endpoints
+    if (endpoint && this.isTechnicalEndpoint(endpoint)) {
+      return;
+    }
+
     this._metrics.requests.total++;
 
     if (successful) {
@@ -221,7 +226,29 @@ export class MonitoringService {
     this.updateRateCalculations();
   }
 
+  private isTechnicalEndpoint(endpoint: string): boolean {
+    const technicalEndpoints = [
+      '/metrics',
+      '/metrics/prometheus',
+      '/health',
+      '/version',
+      '/test',
+      '/test/setup',
+      '/test/cleanup',
+      '/validation-test'
+    ];
+
+    return technicalEndpoints.some(
+      (techEndpoint) => endpoint.startsWith(techEndpoint) || endpoint.includes(techEndpoint)
+    );
+  }
+
   recordError(errorType: string, error: Error, endpoint?: string): void {
+    // Skip recording for technical endpoints
+    if (endpoint && this.isTechnicalEndpoint(endpoint)) {
+      return;
+    }
+
     this._metrics.errors.total++;
     this._metrics.errors.byType[errorType] = (this._metrics.errors.byType[errorType] || 0) + 1;
 
