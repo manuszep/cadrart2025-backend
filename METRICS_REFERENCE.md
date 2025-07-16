@@ -1,3 +1,10 @@
+TODO:
+
+- Logging will be done on a mongoDb instance
+- Logging format will be the one that suits better the API application
+- In order to exploit the logs with Prometheus, we'll create a custom exporter (see https://prometheus.io/docs/instrumenting/exporters/ for examples)
+
+
 # Cadrart Prometheus Metrics Reference
 
 This document provides a comprehensive reference for all Prometheus metrics exposed by the Cadrart backend application. All metrics are prefixed with `cadrart_` for easy identification.

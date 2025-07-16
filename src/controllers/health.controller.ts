@@ -6,8 +6,11 @@ import { ConfigService } from '@nestjs/config';
 
 import { MetricsAuthGuard } from '../guards/metrics-auth.guard';
 
+type IHealthStatusBinaryBalue = 'healthy' | 'unhealthy';
+type IHealthStatusValue = IHealthStatusBinaryBalue | 'degraded';
+
 interface IHealthStatus {
-  status: 'healthy' | 'unhealthy' | 'degraded';
+  status: IHealthStatusValue;
   timestamp: string;
   uptime: number;
   version: string;
@@ -23,13 +26,13 @@ interface IHealthStatus {
     nodeVersion: string;
   };
   services: {
-    database: 'healthy' | 'unhealthy';
-    redis?: 'healthy' | 'unhealthy';
+    database: IHealthStatusBinaryBalue;
+    redis?: IHealthStatusBinaryBalue;
   };
 }
 
 interface IPublicHealthStatus {
-  status: 'healthy' | 'unhealthy' | 'degraded';
+  status: IHealthStatusValue;
   timestamp: string;
   version: string;
 }
@@ -95,8 +98,8 @@ export class HealthController {
   }
 
   private async getHealthStatus(): Promise<IHealthStatus> {
-    const totalMemory = os.totalmem();
-    const freeMemory = os.freemem();
+    const totalMemory = os.totalmem() / 1024;
+    const freeMemory = os.freemem() / 1024;
     const usedMemory = totalMemory - freeMemory;
     const memoryPercentage = (usedMemory / totalMemory) * 100;
 

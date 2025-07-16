@@ -106,6 +106,6 @@ import { MetricsAuthGuard } from './guards/metrics-auth.guard';
 })
 export class CadrartAppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(LoggingMiddleware, SecurityMiddleware, HttpsRedirectMiddleware).forRoutes('*');
+    consumer.apply(LoggingMiddleware, SecurityMiddleware, HttpsRedirectMiddleware).forRoutes('/');
   }
 }

@@ -45,6 +45,7 @@ export function getHelmetConfig(): Record<string, unknown> {
       formAction: ["'self'"]
     }
   };
+
   if (securityConfig.enableHttpsRedirect) {
     cspConfig.upgradeInsecureRequests = true;
   }

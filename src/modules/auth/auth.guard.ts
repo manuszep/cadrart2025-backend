@@ -1,18 +1,15 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 
 @Injectable()
 export class CadrartAuthGuard implements CanActivate {
+  private readonly logger = new Logger('Security');
+
   constructor(
     private jwtService: JwtService,
-    private config: ConfigService,
+    private config: ConfigService
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -25,11 +22,20 @@ export class CadrartAuthGuard implements CanActivate {
 
     try {
       const payload = await this.jwtService.verifyAsync(token, {
-        secret: this.config.get('CADRART_JWT_SECRET'),
+        secret: this.config.get('CADRART_JWT_SECRET')
       });
 
       request['user'] = payload;
     } catch {
+      this.logger.warn('Potential security event detected', {
+        ip: request.ip,
+        userAgent: request.headers['user-agent'],
+        path: request.path,
+        method: request.method,
+        indicators: {
+          AuthRequired: true
+        }
+      });
       throw new UnauthorizedException();
     }
 

@@ -23,8 +23,7 @@ export class SecurityMiddleware implements NestMiddleware {
     const securityIndicators = {
       suspiciousUserAgent: this.isSuspiciousUserAgent(req.headers['user-agent']),
       suspiciousPath: this.isSuspiciousPath(req.path),
-      suspiciousMethod: this.isSuspiciousMethod(req.method),
-      missingAuth: this.isAuthRequired(req.path) && !req.headers.authorization
+      suspiciousMethod: this.isSuspiciousMethod(req.method)
     };
 
     if (Object.values(securityIndicators).some(Boolean)) {
@@ -64,11 +63,5 @@ export class SecurityMiddleware implements NestMiddleware {
 
   private isSuspiciousMethod(method: string): boolean {
     return ['PUT', 'DELETE', 'PATCH'].includes(method.toUpperCase());
-  }
-
-  private isAuthRequired(path: string): boolean {
-    const publicPaths = ['/api/login', '/api/health', '/api/status', '/api/version', '/static'];
-
-    return !publicPaths.some((publicPath) => path.startsWith(publicPath));
   }
 }
