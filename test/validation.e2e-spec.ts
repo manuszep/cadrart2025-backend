@@ -306,7 +306,7 @@ describe('Input Validation (e2e)', () => {
         .send({
           number: 'OFFER-001',
           clientId: 1,
-          status: 0 // ECadrartOfferStatus.STATUS_CREATED
+          status: '0' // ECadrartOfferStatus.STATUS_CREATED
         })
         .expect(201);
     });
