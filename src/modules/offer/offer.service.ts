@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, FindManyOptions, FindOperator, LessThanOrEqual, Like, MoreThanOrEqual, Repository } from 'typeorm';
 import { ECadrartOfferStatus } from '@manuszep/cadrart2025-common';
@@ -6,6 +6,7 @@ import { ECadrartOfferStatus } from '@manuszep/cadrart2025-common';
 import { CadrartBaseService, ICadrartBaseServiceFindParam } from '../../base/base.service';
 import { CadrartOffer } from '../../entities/offer.entity';
 import { MonitoringService } from '../../services/monitoring.service';
+import { CadrartSocketService } from '../../socket/socket.service';
 
 /**
  *  Generate a new offer number in the format yyyymm-xxxx
@@ -45,9 +46,10 @@ export class CadrartOfferService extends CadrartBaseService<CadrartOffer> {
   constructor(
     @InjectRepository(CadrartOffer)
     private offersRepository: Repository<CadrartOffer>,
-    private monitoringService: MonitoringService
+    private monitoringService: MonitoringService,
+    protected readonly socket: CadrartSocketService
   ) {
-    super(offersRepository);
+    super(offersRepository, socket);
   }
 
   override async create(offer: CadrartOffer): Promise<CadrartOffer> {
@@ -60,6 +62,11 @@ export class CadrartOfferService extends CadrartBaseService<CadrartOffer> {
 
     // Record offer creation
     this.monitoringService.recordBusinessEvent('offerCreated');
+
+    this.socket.socket?.emit('create', {
+      name: this.entityName,
+      value: savedOffer
+    });
 
     return savedOffer;
   }
@@ -140,5 +147,38 @@ export class CadrartOfferService extends CadrartBaseService<CadrartOffer> {
     const pattern = `%${needle}%`;
 
     return [{ client: Like(pattern), assignedTo: Like(pattern) }];
+  }
+
+  async checkAndUpdateOfferStatus(originalOffer: CadrartOffer): Promise<CadrartOffer> {
+    const offer = await this.offersRepository.findOne({
+      where: { id: originalOffer.id },
+      relations: ['jobs', 'jobs.tasks']
+    });
+
+    if (!offer) {
+      throw new NotFoundException('Offer not found');
+    }
+
+    const status = offer.status;
+    const allTasksDone = offer.jobs.every((job) => job.tasks.every((task) => task.doneCount === job.count));
+
+    if (status !== ECadrartOfferStatus.STATUS_DONE && allTasksDone) {
+      offer.status = ECadrartOfferStatus.STATUS_DONE;
+      this.offersRepository.save(offer);
+    }
+
+    if (status === ECadrartOfferStatus.STATUS_DONE && !allTasksDone) {
+      offer.status = ECadrartOfferStatus.STATUS_STARTED;
+      this.offersRepository.save(offer);
+    }
+
+    if (offer.status !== status) {
+      this.socket.socket?.emit('update', {
+        name: this.entityName,
+        entity: offer
+      });
+    }
+
+    return offer;
   }
 }

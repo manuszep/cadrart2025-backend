@@ -1,16 +1,5 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  ManyToOne,
-  OneToMany,
-  BaseEntity,
-} from 'typeorm';
-import {
-  ECadrartArticlePriceMethod,
-  ECadrartArticleFamily,
-  ICadrartArticle,
-} from '@manuszep/cadrart2025-common';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany, BaseEntity } from 'typeorm';
+import { ECadrartArticlePriceMethod, ECadrartArticleFamily, ICadrartArticle } from '@manuszep/cadrart2025-common';
 
 import { ColumnNumericTransformer } from '../utils';
 
@@ -34,7 +23,7 @@ export class CadrartArticle extends BaseEntity implements ICadrartArticle {
     precision: 7,
     scale: 2,
     nullable: true,
-    transformer: new ColumnNumericTransformer(),
+    transformer: new ColumnNumericTransformer()
   })
   buyPrice?: number;
 
@@ -43,21 +32,21 @@ export class CadrartArticle extends BaseEntity implements ICadrartArticle {
     precision: 7,
     scale: 2,
     nullable: true,
-    transformer: new ColumnNumericTransformer(),
+    transformer: new ColumnNumericTransformer()
   })
   sellPrice?: number;
 
   @Column({
     type: 'enum',
     enum: ECadrartArticlePriceMethod,
-    default: ECadrartArticlePriceMethod.BY_LENGTH,
+    default: ECadrartArticlePriceMethod.BY_LENGTH
   })
   getPriceMethod!: ECadrartArticlePriceMethod;
 
   @Column({
     type: 'enum',
     enum: ECadrartArticleFamily,
-    default: ECadrartArticleFamily.ASSEMBLY,
+    default: ECadrartArticleFamily.ASSEMBLY
   })
   family!: ECadrartArticleFamily;
 
@@ -67,17 +56,13 @@ export class CadrartArticle extends BaseEntity implements ICadrartArticle {
     scale: 2,
     default: 100,
     nullable: true,
-    transformer: new ColumnNumericTransformer(),
+    transformer: new ColumnNumericTransformer()
   })
   maxReduction?: number;
 
-  @ManyToOne(
-    () => CadrartProvider,
-    (provider: CadrartProvider) => provider.articles,
-    {
-      nullable: true,
-    },
-  )
+  @ManyToOne(() => CadrartProvider, (provider: CadrartProvider) => provider.articles, {
+    nullable: true
+  })
   provider?: CadrartProvider;
 
   @ManyToOne(() => CadrartFormula, { nullable: true })
@@ -91,7 +76,7 @@ export class CadrartArticle extends BaseEntity implements ICadrartArticle {
     precision: 7,
     scale: 2,
     nullable: true,
-    transformer: new ColumnNumericTransformer(),
+    transformer: new ColumnNumericTransformer()
   })
   maxLength?: number;
 
@@ -100,15 +85,18 @@ export class CadrartArticle extends BaseEntity implements ICadrartArticle {
     precision: 7,
     scale: 2,
     nullable: true,
-    transformer: new ColumnNumericTransformer(),
+    transformer: new ColumnNumericTransformer()
   })
   maxWidth?: number;
 
   @Column({ type: 'boolean', default: false })
   combine!: boolean;
 
+  @Column({ type: 'boolean', default: false })
+  outOfStock!: boolean;
+
   @OneToMany(() => CadrartTask, (task: CadrartTask) => task.article, {
-    nullable: true,
+    nullable: true
   })
   tasks?: CadrartTask[];
 }

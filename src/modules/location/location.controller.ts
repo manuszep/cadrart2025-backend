@@ -5,7 +5,6 @@ import { ICadrartEntitiesResponse } from '@manuszep/cadrart2025-common';
 
 import { CadrartBaseController } from '../../base/base.controller';
 import { CadrartLocation } from '../../entities/location.entity';
-import { CadrartSocketService } from '../../socket/socket.service';
 import { CadrartJwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateLocationDto, UpdateLocationDto, LocationQueryDto } from '../../dto/location.dto';
 
@@ -18,11 +17,8 @@ export class CadrartLocationController extends CadrartBaseController<
   UpdateLocationDto,
   LocationQueryDto
 > {
-  constructor(
-    private readonly locationService: CadrartLocationService,
-    private readonly localSocket: CadrartSocketService
-  ) {
-    super(locationService, localSocket);
+  constructor(private readonly locationService: CadrartLocationService) {
+    super(locationService);
   }
 
   override getLabelForOption(entity: CadrartLocation): string {

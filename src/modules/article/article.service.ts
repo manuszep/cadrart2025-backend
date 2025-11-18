@@ -5,6 +5,7 @@ import { Like, Repository } from 'typeorm';
 import { CadrartBaseService, ICadrartBaseServiceFindParam } from '../../base/base.service';
 import { CadrartArticle } from '../../entities/article.entity';
 import { CreateArticleDto, UpdateArticleDto } from '../../dto/article.dto';
+import { CadrartSocketService } from '../../socket/socket.service';
 
 @Injectable()
 export class CadrartArticleService extends CadrartBaseService<CadrartArticle, CreateArticleDto, UpdateArticleDto> {
@@ -12,8 +13,11 @@ export class CadrartArticleService extends CadrartBaseService<CadrartArticle, Cr
   override findAllrelations = ['formula', 'provider'];
   override findOnerelations = ['formula', 'provider'];
 
-  constructor(@InjectRepository(CadrartArticle) private articlesRepository: Repository<CadrartArticle>) {
-    super(articlesRepository);
+  constructor(
+    @InjectRepository(CadrartArticle) private articlesRepository: Repository<CadrartArticle>,
+    protected readonly socket: CadrartSocketService
+  ) {
+    super(articlesRepository, socket);
   }
 
   async findCombinable(): Promise<CadrartArticle[]> {

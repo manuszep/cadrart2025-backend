@@ -4,7 +4,6 @@ import { ICadrartEntitiesResponse } from '@manuszep/cadrart2025-common';
 
 import { CadrartBaseController } from '../../base/base.controller';
 import { CadrartArticle } from '../../entities/article.entity';
-import { CadrartSocketService } from '../../socket/socket.service';
 import { CadrartJwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateArticleDto, UpdateArticleDto, ArticleQueryDto } from '../../dto/article.dto';
 
@@ -17,11 +16,8 @@ export class CadrartArticleController extends CadrartBaseController<
   UpdateArticleDto,
   ArticleQueryDto
 > {
-  constructor(
-    private readonly articleService: CadrartArticleService,
-    private readonly localSocket: CadrartSocketService
-  ) {
-    super(articleService, localSocket);
+  constructor(private readonly articleService: CadrartArticleService) {
+    super(articleService);
   }
 
   override getLabelForOption(entity: CadrartArticle): string {

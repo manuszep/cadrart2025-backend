@@ -1,4 +1,5 @@
 import { NotFoundException } from '@nestjs/common';
+import { CadrartSocketService } from 'src/socket/socket.service';
 import { Repository, FindManyOptions, BaseEntity, FindOptionsWhere, DeepPartial } from 'typeorm';
 
 interface ICadrartBaseEntityProps {
@@ -19,11 +20,22 @@ export abstract class CadrartBaseService<T extends ICadrartBaseEntity, CreateDto
   protected findOnerelations: string[] = [];
   protected findOneOptions: FindManyOptions<T> = {};
 
-  constructor(protected readonly repository: Repository<T>) {}
+  constructor(
+    protected readonly repository: Repository<T>,
+    protected readonly socket: CadrartSocketService
+  ) {}
 
   async create(dto: CreateDto): Promise<T> {
     const newEntity = this.repository.create(dto as DeepPartial<T>);
-    return this.repository.save(newEntity);
+
+    return this.repository.save(newEntity).then((value) => {
+      this.socket.socket?.emit('create', {
+        name: this.entityName,
+        value
+      });
+
+      return value;
+    });
   }
 
   async findAll(page = 1, count = 20, needle?: string): Promise<{ entities: T[]; total: number }> {
@@ -70,11 +82,24 @@ export abstract class CadrartBaseService<T extends ICadrartBaseEntity, CreateDto
       ...entity,
       ...(dto as DeepPartial<T>)
     });
-    return this.repository.save(updatedEntity);
+
+    return this.repository.save(updatedEntity).then((value) => {
+      this.socket.socket?.emit('update', {
+        name: this.entityName,
+        value
+      });
+
+      return value;
+    });
   }
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
-    await this.repository.remove(entity);
+    await this.repository.remove(entity).then(() => {
+      this.socket.socket?.emit('delete', {
+        name: this.entityName,
+        id
+      });
+    });
   }
 }

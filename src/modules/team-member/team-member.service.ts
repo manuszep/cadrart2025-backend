@@ -4,6 +4,7 @@ import { Like, Repository } from 'typeorm';
 
 import { CadrartBaseService, ICadrartBaseServiceFindParam } from '../../base/base.service';
 import { CadrartTeamMember } from '../../entities/team-member.entity';
+import { CadrartSocketService } from '../../socket/socket.service';
 
 @Injectable()
 export class CadrartTeamMemberService extends CadrartBaseService<CadrartTeamMember> {
@@ -11,9 +12,10 @@ export class CadrartTeamMemberService extends CadrartBaseService<CadrartTeamMemb
 
   constructor(
     @InjectRepository(CadrartTeamMember)
-    private teamMembersRepository: Repository<CadrartTeamMember>
+    private teamMembersRepository: Repository<CadrartTeamMember>,
+    protected readonly socket: CadrartSocketService
   ) {
-    super(teamMembersRepository);
+    super(teamMembersRepository, socket);
   }
 
   async findOneByEmail(mail: string): Promise<CadrartTeamMember> {
@@ -32,7 +34,14 @@ export class CadrartTeamMemberService extends CadrartBaseService<CadrartTeamMemb
       ...updatedEntityDTO
     });
 
-    return this.repository.save(updatedEntity);
+    return this.repository.save(updatedEntity).then((value) => {
+      this.socket.socket?.emit('update', {
+        name: this.entityName,
+        entity: value
+      });
+
+      return value;
+    });
   }
 
   getSearchConfig(needle: string): ICadrartBaseServiceFindParam<CadrartTeamMember> {

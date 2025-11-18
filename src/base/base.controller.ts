@@ -8,7 +8,6 @@ import {
   ICadrartResponse
 } from '@manuszep/cadrart2025-common';
 
-import { CadrartSocketService } from '../socket/socket.service';
 import { CadrartJwtAuthGuard } from '../modules/auth/jwt-auth.guard';
 
 import { CadrartBaseService, ICadrartBaseEntity } from './base.service';
@@ -19,10 +18,7 @@ export class CadrartBaseController<
   UpdateDto = unknown,
   QueryDto = Record<string, unknown>
 > {
-  constructor(
-    private readonly service: CadrartBaseService<T>,
-    private readonly socket: CadrartSocketService
-  ) {}
+  constructor(private readonly service: CadrartBaseService<T>) {}
 
   getLabelForOption(entity: T): string {
     return (entity as unknown as { name: string }).name;
@@ -41,11 +37,6 @@ export class CadrartBaseController<
   @Post()
   async create(@Res() res: Response, @Body() body: CreateDto): Promise<Response<ICadrartEntityResponse<T>>> {
     const entity = await this.service.create(body);
-
-    this.socket.socket?.emit('create', {
-      name: this.service.entityName,
-      entity
-    });
 
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
@@ -107,11 +98,6 @@ export class CadrartBaseController<
   ): Promise<Response<ICadrartEntityResponse<T>>> {
     const entity = await this.service.update(id, body);
 
-    this.socket.socket?.emit('update', {
-      name: this.service.entityName,
-      entity
-    });
-
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
       entity
@@ -129,11 +115,6 @@ export class CadrartBaseController<
         message: `ERROR.API.${this.service.entityName.toUpperCase()}.DELETE`
       });
     }
-
-    this.socket.socket?.emit('delete', {
-      name: this.service.entityName,
-      id
-    });
 
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,

@@ -2,7 +2,6 @@ import { Controller } from '@nestjs/common';
 
 import { CadrartBaseController } from '../../base/base.controller';
 import { CadrartFormula } from '../../entities/formula.entity';
-import { CadrartSocketService } from '../../socket/socket.service';
 import { CreateFormulaDto, UpdateFormulaDto, FormulaQueryDto } from '../../dto/formula.dto';
 
 import { CadrartFormulaService } from './formula.service';
@@ -14,11 +13,8 @@ export class CadrartFormulaController extends CadrartBaseController<
   UpdateFormulaDto,
   FormulaQueryDto
 > {
-  constructor(
-    private readonly formulaService: CadrartFormulaService,
-    private readonly localSocket: CadrartSocketService
-  ) {
-    super(formulaService, localSocket);
+  constructor(private readonly formulaService: CadrartFormulaService) {
+    super(formulaService);
   }
 
   override getLabelForOption(entity: CadrartFormula): string {

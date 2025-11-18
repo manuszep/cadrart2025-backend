@@ -4,6 +4,7 @@ import { Like, Repository } from 'typeorm';
 
 import { CadrartBaseService, ICadrartBaseServiceFindParam } from '../../base/base.service';
 import { CadrartClient } from '../../entities/client.entity';
+import { CadrartSocketService } from '../../socket/socket.service';
 
 @Injectable()
 export class CadrartClientService extends CadrartBaseService<CadrartClient> {
@@ -11,8 +12,11 @@ export class CadrartClientService extends CadrartBaseService<CadrartClient> {
   override findAllrelations = ['tag'];
   override findOnerelations = ['tag'];
 
-  constructor(@InjectRepository(CadrartClient) private clientsRepository: Repository<CadrartClient>) {
-    super(clientsRepository);
+  constructor(
+    @InjectRepository(CadrartClient) private clientsRepository: Repository<CadrartClient>,
+    protected readonly socket: CadrartSocketService
+  ) {
+    super(clientsRepository, socket);
   }
 
   getSearchConfig(needle: string): ICadrartBaseServiceFindParam<CadrartClient> {

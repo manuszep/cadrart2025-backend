@@ -5,7 +5,6 @@ import { ICadrartEntitiesResponse } from '@manuszep/cadrart2025-common';
 
 import { CadrartBaseController } from '../../base/base.controller';
 import { CadrartProvider } from '../../entities/provider.entity';
-import { CadrartSocketService } from '../../socket/socket.service';
 import { CadrartJwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateProviderDto, UpdateProviderDto, ProviderQueryDto } from '../../dto/provider.dto';
 
@@ -18,11 +17,8 @@ export class CadrartProviderController extends CadrartBaseController<
   UpdateProviderDto,
   ProviderQueryDto
 > {
-  constructor(
-    private readonly providerService: CadrartProviderService,
-    private readonly localSocket: CadrartSocketService
-  ) {
-    super(providerService, localSocket);
+  constructor(private readonly providerService: CadrartProviderService) {
+    super(providerService);
   }
 
   override getLabelForOption(entity: CadrartProvider): string {

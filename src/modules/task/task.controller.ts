@@ -2,7 +2,6 @@ import { Controller, Get, HttpStatus, Param, Put, Res, UseGuards, ParseIntPipe }
 import { Response } from 'express';
 import { ECadrartArticleFamily, ICadrartEntitiesResponse, ICadrartExtendedTask } from '@manuszep/cadrart2025-common';
 
-import { CadrartSocketService } from '../../socket/socket.service';
 import { CadrartJwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CadrartOfferService } from '../offer/offer.service';
 
@@ -20,7 +19,6 @@ const familyRouteMapping = {
 @Controller('task')
 export class CadrartTaskController {
   constructor(
-    private readonly socket: CadrartSocketService,
     private readonly offerService: CadrartOfferService,
     private readonly tasksService: CadrartTaskService
   ) {}
@@ -58,11 +56,6 @@ export class CadrartTaskController {
   ): Promise<Response<{ statusCode: number; result: unknown }>> {
     const result = await this.tasksService.doTask(id);
 
-    this.socket.socket?.emit('update', {
-      name: this.tasksService.entityName,
-      entity: { id }
-    });
-
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
       result
@@ -77,11 +70,6 @@ export class CadrartTaskController {
   ): Promise<Response<{ statusCode: number; result: unknown }>> {
     const result = await this.tasksService.undoTask(id);
 
-    this.socket.socket?.emit('update', {
-      name: this.tasksService.entityName,
-      entity: { id }
-    });
-
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
       result
@@ -95,11 +83,6 @@ export class CadrartTaskController {
     @Param('id', ParseIntPipe) id: number
   ): Promise<Response<{ statusCode: number; result: unknown }>> {
     const result = await this.tasksService.blockTask(id);
-
-    this.socket.socket?.emit('update', {
-      name: this.tasksService.entityName,
-      entity: { id }
-    });
 
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
