@@ -65,7 +65,7 @@ export class CadrartOfferService extends CadrartBaseService<CadrartOffer> {
 
     this.socket.socket?.emit('create', {
       name: this.entityName,
-      value: savedOffer
+      entity: savedOffer
     });
 
     return savedOffer;

@@ -31,7 +31,7 @@ export abstract class CadrartBaseService<T extends ICadrartBaseEntity, CreateDto
     return this.repository.save(newEntity).then((value) => {
       this.socket.socket?.emit('create', {
         name: this.entityName,
-        value
+        entity: value
       });
 
       return value;
@@ -86,7 +86,7 @@ export abstract class CadrartBaseService<T extends ICadrartBaseEntity, CreateDto
     return this.repository.save(updatedEntity).then((value) => {
       this.socket.socket?.emit('update', {
         name: this.entityName,
-        value
+        entity: value
       });
 
       return value;
