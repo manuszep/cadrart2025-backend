@@ -3,10 +3,8 @@ import { Response } from 'express';
 import { ECadrartArticleFamily, ICadrartEntitiesResponse, ICadrartExtendedTask } from '@manuszep/cadrart2025-common';
 
 import { CadrartJwtAuthGuard } from '../auth/jwt-auth.guard';
-import { CadrartOfferService } from '../offer/offer.service';
 
-import { extractTasksFromOffers } from './task.mapper';
-import { CadrartTaskService } from './task.service';
+import { CadrartExtendedTaskService } from './service';
 
 const familyRouteMapping = {
   assembly: ECadrartArticleFamily.ASSEMBLY,
@@ -17,34 +15,31 @@ const familyRouteMapping = {
 };
 
 @Controller('task')
-export class CadrartTaskController {
+export class CadrartExtendedTaskController {
   constructor(
-    private readonly offerService: CadrartOfferService,
-    private readonly tasksService: CadrartTaskService
+    private readonly extendedTasksService: CadrartExtendedTaskService
   ) {}
-
-  getLabelForOption(entity: ICadrartExtendedTask): string {
-    return entity.articleName;
-  }
 
   @UseGuards(CadrartJwtAuthGuard)
   @Get('/:family')
   async findAllByFamily(
     @Res() res: Response,
-    @Param('family') family: string
+    @Param('family') familyRoute: string
   ): Promise<Response<ICadrartEntitiesResponse<ICadrartExtendedTask>>> {
-    if (Object.keys(familyRouteMapping).indexOf(family) === -1) {
+    const family = familyRouteMapping[familyRoute as keyof typeof familyRouteMapping];
+    
+    if (!family && family !== 0) {
       return res.status(HttpStatus.BAD_REQUEST).json({
         statusCode: HttpStatus.BAD_REQUEST,
         message: 'Invalid article family'
       });
     }
 
-    const result = await this.offerService.findAllStarted();
+    const result = await this.extendedTasksService.findByFamily(family);
 
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
-      entities: extractTasksFromOffers(familyRouteMapping[family], result)
+      entities: result
     });
   }
 
@@ -54,7 +49,7 @@ export class CadrartTaskController {
     @Res() res: Response,
     @Param('id', ParseIntPipe) id: number
   ): Promise<Response<{ statusCode: number; result: unknown }>> {
-    const result = await this.tasksService.doTask(id);
+    const result = await this.extendedTasksService.doTask(id);
 
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
@@ -68,7 +63,7 @@ export class CadrartTaskController {
     @Res() res: Response,
     @Param('id', ParseIntPipe) id: number
   ): Promise<Response<{ statusCode: number; result: unknown }>> {
-    const result = await this.tasksService.undoTask(id);
+    const result = await this.extendedTasksService.undoTask(id);
 
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
@@ -82,7 +77,7 @@ export class CadrartTaskController {
     @Res() res: Response,
     @Param('id', ParseIntPipe) id: number
   ): Promise<Response<{ statusCode: number; result: unknown }>> {
-    const result = await this.tasksService.blockTask(id);
+    const result = await this.extendedTasksService.blockTask(id);
 
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,

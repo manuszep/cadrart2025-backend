@@ -1,5 +1,6 @@
-import { Controller, Get, HttpStatus, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Param, ParseIntPipe, Post, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
+import { UpdateResult } from 'typeorm';
 import { ICadrartEntitiesResponse } from '@manuszep/cadrart2025-common';
 
 import { CadrartBaseController } from '../../base/base.controller';
@@ -28,6 +29,45 @@ export class CadrartArticleController extends CadrartBaseController<
   @Get('combinable')
   async getCombinable(@Res() res: Response): Promise<Response<ICadrartEntitiesResponse<CadrartArticle>>> {
     const entities = await this.articleService.findCombinable();
+
+    return res.status(HttpStatus.OK).json({
+      statusCode: HttpStatus.OK,
+      entities
+    });
+  }
+
+  @UseGuards(CadrartJwtAuthGuard)
+  @Post('/:id/out-of-stock')
+  async outOfStock(
+    @Res() res: Response,
+    @Param('id', ParseIntPipe) id: number
+  ): Promise<Response<{ statusCode: number; result: UpdateResult }>> {
+    const result = await this.articleService.setOutOfStock(id);
+
+    return res.status(HttpStatus.OK).json({
+      statusCode: HttpStatus.OK,
+      result
+    });
+  }
+
+  @UseGuards(CadrartJwtAuthGuard)
+  @Post('/:id/in-stock')
+  async inStock(
+    @Res() res: Response,
+    @Param('id', ParseIntPipe) id: number
+  ): Promise<Response<{ statusCode: number; result: UpdateResult }>> {
+    const result = await this.articleService.setInStock(id);
+
+    return res.status(HttpStatus.OK).json({
+      statusCode: HttpStatus.OK,
+      result
+    });
+  }
+
+  @UseGuards(CadrartJwtAuthGuard)
+  @Get('out-of-stock')
+  async getOutOfStock(@Res() res: Response): Promise<Response<ICadrartEntitiesResponse<CadrartArticle>>> {
+    const entities = await this.articleService.getOutOfStock();
 
     return res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,

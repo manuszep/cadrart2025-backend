@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Repository } from 'typeorm';
+import { Like, Repository, UpdateResult } from 'typeorm';
 
 import { CadrartBaseService, ICadrartBaseServiceFindParam } from '../../base/base.service';
 import { CadrartArticle } from '../../entities/article.entity';
@@ -35,5 +35,20 @@ export class CadrartArticleService extends CadrartBaseService<CadrartArticle, Cr
     const pattern = `%${needle}%`;
 
     return [{ name: Like(pattern) }, { place: Like(pattern) }, { provider: { name: Like(pattern) } }];
+  }
+
+  setOutOfStock(id: number): Promise<UpdateResult> {
+    return this.articlesRepository.update(id, { outOfStock: true });
+  }
+
+  setInStock(id: number): Promise<UpdateResult> {
+    return this.articlesRepository.update(id, { outOfStock: false });
+  }
+
+  getOutOfStock(): Promise<CadrartArticle[]> {
+    return this.articlesRepository.find({
+      relations: this.findAllrelations,
+      where: { outOfStock: true }
+    });
   }
 }

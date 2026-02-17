@@ -9,6 +9,7 @@ import { CadrartArticleController } from './article.controller';
 @Module({
   imports: [TypeOrmModule.forFeature([CadrartArticle])],
   controllers: [CadrartArticleController],
-  providers: [CadrartArticleService]
+  providers: [CadrartArticleService],
+  exports: [CadrartArticleService]
 })
 export class CadrartArticleModule {}

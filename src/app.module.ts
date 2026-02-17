@@ -36,6 +36,7 @@ import { TestModule } from './controllers/test.module';
 import { MonitoringModule } from './services/monitoring.module';
 import { ErrorLoggingInterceptor } from './interceptors/error-logging.interceptor';
 import { MetricsAuthGuard } from './guards/metrics-auth.guard';
+import { CadrartExtendedTaskModule } from './modules/extended-task/module';
 
 @Module({
   imports: [
@@ -82,6 +83,7 @@ import { MetricsAuthGuard } from './guards/metrics-auth.guard';
     CadrartSocketModule,
     CadrartArticleModule,
     CadrartClientModule,
+    CadrartExtendedTaskModule,
     CadrartFileModule,
     CadrartFormulaModule,
     CadrartJobModule,

@@ -10,7 +10,7 @@ export interface ICadrartBaseEntity extends BaseEntity, ICadrartBaseEntityProps 
 
 export type ICadrartBaseServiceFindParam<T> = FindOptionsWhere<T> | FindOptionsWhere<T>[];
 
-export abstract class CadrartBaseService<T extends ICadrartBaseEntity, CreateDto = unknown, UpdateDto = unknown> {
+export abstract class CadrartBaseService<T, CreateDto = unknown, UpdateDto = unknown> {
   abstract entityName: string;
   protected relations: string[] = [];
   protected findOptions: FindManyOptions<T> = {};

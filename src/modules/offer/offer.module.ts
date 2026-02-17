@@ -10,6 +10,7 @@ import { CadrartOfferController } from './offer.controller';
 @Module({
   imports: [TypeOrmModule.forFeature([CadrartOffer]), MonitoringModule],
   controllers: [CadrartOfferController],
-  providers: [CadrartOfferService]
+  providers: [CadrartOfferService],
+  exports: [CadrartOfferService]
 })
 export class CadrartOfferModule {}
